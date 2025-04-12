@@ -1,3 +1,9 @@
+console.log("🟢 JS loaded");
+console.log("skibidi is:", typeof skibidi);
+
+
+
+
 function getPixelValue(value) {
   return parseInt(value.replace("px", "")) || 0;
 }
