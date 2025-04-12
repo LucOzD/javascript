@@ -1,21 +1,21 @@
 function leftArrowPressed() {
   var element = document.getElementById("image1");
-  element.style.left = parseInt(element.style.left) - 5 + "px";
+  element.style.left = parseInt(window.getComputedStyle(element).left) - 5 + "px";
 }
 
 function rightArrowPressed() {
   var element = document.getElementById("image1");
-  element.style.left = parseInt(element.style.left) + 5 + "px";
+  element.style.left = parseInt(window.getComputedStyle(element).left) + 5 + "px";
 }
 
 function upArrowPressed() {
   var element = document.getElementById("image1");
-  element.style.top = parseInt(element.style.top) - 5 + "px";
+  element.style.top = parseInt(window.getComputedStyle(element).top) - 5 + "px";
 }
 
 function downArrowPressed() {
   var element = document.getElementById("image1");
-  element.style.top = parseInt(element.style.top) + 5 + "px";
+  element.style.top = parseInt(window.getComputedStyle(element).top) + 5 + "px";
 }
 
 function moveSelection(evt) {
