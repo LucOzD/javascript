@@ -1,23 +1,60 @@
-<!DOCTYPE html>
 <html>
-<head>
-    <title>Move the me!</title>
-    <style>
-        body {
-            background-color: lightblue;
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>Test Move Object</title>
+
+    <script type="text/javascript">
+
+            function leftArrowPressed() {
+            var element = document.getElementById("image1");
+            element.style.left = parseInt(element.style.left) - 5 + 'px';
+            }
+
+            function rightArrowPressed() {
+            var element = document.getElementById("image1");
+            element.style.left = parseInt(element.style.left) + 5 + 'px';
+
+            }
+
+            function upArrowPressed() {
+            var element = document.getElementById("image1");
+            element.style.top = parseInt(element.style.top) - 5 + 'px';
+            }
+
+            function downArrowPressed() {
+            var element = document.getElementById("image1");
+            element.style.top = parseInt(element.style.top) + 5 + 'px';
+            }
+
+            function moveSelection(evt) {
+                switch (evt.keyCode) {
+                    case 37:
+                    leftArrowPressed();
+                    break;
+                    case 39:
+                    rightArrowPressed();
+                    break;
+                    case 38:
+                    upArrowPressed();
+                    break;
+                    case 40:
+                    downArrowPressed();
+                    break;
+                    }
+                };
+
+        function docReady()
+        {
+          
+          window.addEventListener('keydown', moveSelection);
         }
-        #image1 {
-            position: absolute;
-            left: 0px;
-            top: 0px;
-            height: 69px;
-            width: 69px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Use the arrow keys to move the Lucas Daniel Sebastian Drane!</h1>
-    <img id="image1" src="me.png" alt="Lucas Daniel Sebastian Drane">
-    <script src="javascript.js"></script>
-</body>
+
+  </script>
+  </head>
+
+  <body onload="docReady()" onkeydown="" onkeyup="" bgcolor='yellow'>
+   Test
+  <img id="image1" src="http://placekitten.com/69/69" style="position:absolute;left:0; top:0;" height="15" width="15">
+  </body>
+   end html
 </html>
