@@ -12,12 +12,12 @@ function rightArrowPressed() {
 
 function upArrowPressed() {
   var element = document.getElementById("image1");
-  element.style.top = parseInt(element.style.top) - 5 + "px"; 
+  element.style.top = parseInt(element.style.top) - 5 + "px";
 }
 
 function downArrowPressed() {
   var element = document.getElementById("image1");
-  element.style.top = parseInt(element.style.top) + 5 + "px"; 
+  element.style.top = parseInt(element.style.top) + 5 + "px";
 }
 
 function moveSelection(evt) {
@@ -35,7 +35,7 @@ function moveSelection(evt) {
           downArrowPressed();
           break;
   }
-}
+} // Curly brace moved here!
 
 function docReady() {
   window.addEventListener('keydown', moveSelection);
