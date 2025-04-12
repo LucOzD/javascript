@@ -37,6 +37,6 @@ function moveSelection(evt) {
   }
 } // Curly brace moved here!
 
-function docReady() {
+function skibidi() {
   window.addEventListener('keydown', moveSelection);
 }
