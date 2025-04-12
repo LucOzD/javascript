@@ -35,7 +35,7 @@ function moveSelection(evt) {
           downArrowPressed();
           break;
   }
-} // Curly brace moved here!
+} 
 
 function skibidi() {
   window.addEventListener('keydown', moveSelection);
