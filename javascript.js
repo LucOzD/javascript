@@ -1,57 +1,53 @@
-console.log("🟢 JS loaded");
-console.log("skibidi is:", typeof skibidi);
+const img = document.getElementById("image1");
 
+// Starting position
+let posX = 0;
+let posY = 0;
+const speed = 5;
 
+// Track which keys are currently pressed
+const keysPressed = {
+    ArrowLeft: false,
+    ArrowRight: false,
+    ArrowUp: false,
+    ArrowDown: false
+};
 
+// When a key is pressed down, mark it as true
+document.addEventListener("keydown", (evt) => {
+    if (evt.key in keysPressed) {
+        keysPressed[evt.key] = true;
+    }
+});
 
-function getPixelValue(value) {
-  return parseInt(value.replace("px", "")) || 0;
+// When a key is released, mark it as false
+document.addEventListener("keyup", (evt) => {
+    if (evt.key in keysPressed) {
+        keysPressed[evt.key] = false;
+    }
+});
+
+// Movement logic using requestAnimationFrame
+function moveImage() {
+    if (keysPressed.ArrowLeft) {
+        posX -= speed;
+    }
+    if (keysPressed.ArrowRight) {
+        posX += speed;
+    }
+    if (keysPressed.ArrowUp) {
+        posY -= speed;
+    }
+    if (keysPressed.ArrowDown) {
+        posY += speed;
+    }
+
+    // Apply new position to the image
+    img.style.left = posX + "px";
+    img.style.top = posY + "px";
+
+    requestAnimationFrame(moveImage);
 }
 
-function leftArrowPressed() {
-  var element = document.getElementById("image1");
-  var left = getPixelValue(window.getComputedStyle(element).left);
-  element.style.left = (left - 5) + "px";
-}
-
-function rightArrowPressed() {
-  var element = document.getElementById("image1");
-  var left = getPixelValue(window.getComputedStyle(element).left);
-  element.style.left = (left + 5) + "px";
-}
-
-function upArrowPressed() {
-  var element = document.getElementById("image1");
-  var top = getPixelValue(window.getComputedStyle(element).top);
-  element.style.top = (top - 5) + "px";
-}
-
-function downArrowPressed() {
-  var element = document.getElementById("image1");
-  var top = getPixelValue(window.getComputedStyle(element).top);
-  element.style.top = (top + 5) + "px";
-}
-
-function moveSelection(evt) {
-  switch (evt.key) {
-      case "ArrowLeft":
-          leftArrowPressed();
-          break;
-      case "ArrowRight":
-          rightArrowPressed();
-          break;
-      case "ArrowUp":
-          upArrowPressed();
-          break;
-      case "ArrowDown":
-          downArrowPressed();
-          break;
-  }
-}
-
-function skibidi() {
-  window.addEventListener('keydown', moveSelection);
-}
-
-// Run the setup
-window.onload = skibidi;
+// Start the loop
+moveImage();
