@@ -1,5 +1,6 @@
 // Get the image element
 const img = document.getElementById("image1");
+const goal = document.getElementById("image2");
 
 // Starting position and movement values
 let posX = 300;
