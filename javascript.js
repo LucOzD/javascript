@@ -7,4 +7,4 @@ document.getElementById("myParagraph").textContent = words;
 }
 
 
-document.getElementById("myParagraph").textContent = myVariable;
+document.getElementById("myParagraph").textContent = words;
