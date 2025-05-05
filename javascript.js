@@ -6,3 +6,7 @@ score == score+1
 
 
 }
+
+
+
+document.getElementById("scoreparagraph").textContent = score;
