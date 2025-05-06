@@ -1,4 +1,4 @@
-var myPhrases = ["liking", "femboys", "isnt", "is", "gay"];
+var myPhrases = ["i..amsteve", "bladesfordays", "massive", "youaresteve", "skibiid"];
 
 function buttonPressed() {
   var randomIndex = Math.floor(Math.random() * myPhrases.length);
