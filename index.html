@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Wall Dodger</title>
+    <title>Infinite Chase</title>
     <style>
         body {
-            background-color: #111;
+            background: #111;
             color: #0f0;
             font-family: monospace;
             text-align: center;
@@ -18,26 +18,23 @@
             overflow: hidden;
             border: 3px solid #0f0;
         }
-        #player {
+        #player, #enemy {
             position: absolute;
             width: 60px;
             height: 60px;
-        }
-        .wall {
-            position: absolute;
-            background: #f00;
         }
     </style>
 </head>
 <body>
 
-<h1>Wall Dodger</h1>
-<p>Use arrow keys to rotate + thrust</p>
+<h1>Infinite Chase</h1>
+<p>WASD to move — survive as long as possible</p>
 <p>Score: <span id="score">0</span></p>
 <p>High Score: <span id="highScore">0</span></p>
 
 <div id="gameArea">
     <img id="player" src="me.png">
+    <img id="enemy" src="enemy.png">
 </div>
 
 <script src="javascript.js"></script>

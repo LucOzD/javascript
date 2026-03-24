@@ -1,133 +1,74 @@
-// DOM elements
+// DOM
 const gameArea = document.getElementById("gameArea");
-const player = document.getElementById("player");
-const scoreDisplay = document.getElementById("score");
-const highScoreDisplay = document.getElementById("highScore");
+const playerEl = document.getElementById("player");
+const enemyEl = document.getElementById("enemy");
+const scoreEl = document.getElementById("score");
+const highScoreEl = document.getElementById("highScore");
 
-// Player physics
-let posX = 400;
-let posY = 300;
-let angle = 0;
-let velX = 0;
-let velY = 0;
+// Player world position
+let px = 0;
+let py = 0;
+const speed = 4;
 
-const thrust = 0.2;
-const friction = 0.99;
-const rotationSpeed = 0.05;
-const thrustOffset = -Math.PI / 2;
+// Enemy world position
+let ex = 300;
+let ey = 300;
+let enemySpeed = 1.5;
 
-// Input tracking
-const keys = {
-    ArrowLeft: false,
-    ArrowRight: false,
-    ArrowUp: false,
-    ArrowDown: false
-};
+// Input
+const keys = { w: false, a: false, s: false, d: false };
+document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
 
-document.addEventListener("keydown", e => {
-    if (e.key in keys) keys[e.key] = true;
-});
-document.addEventListener("keyup", e => {
-    if (e.key in keys) keys[e.key] = false;
-});
-
-// Walls
-let walls = [];
+// Score
 let score = 0;
 let highScore = 0;
 
-// Spawn a wall every 1.5 seconds
-setInterval(() => {
-    spawnWall();
-}, 1500);
-
-function spawnWall() {
-    const wall = document.createElement("div");
-    wall.classList.add("wall");
-
-    const height = Math.random() * 200 + 50;
-    const y = Math.random() * (600 - height);
-
-    wall.style.width = "40px";
-    wall.style.height = height + "px";
-    wall.style.left = "800px";
-    wall.style.top = y + "px";
-
-    walls.push({ element: wall, x: 800, y, height });
-    gameArea.appendChild(wall);
-}
-
+// Movement
 function movePlayer() {
-    // Rotation
-    if (keys.ArrowLeft) angle -= rotationSpeed;
-    if (keys.ArrowRight) angle += rotationSpeed;
-
-    // Thrust
-    if (keys.ArrowUp) {
-        velX += Math.cos(angle + thrustOffset) * thrust;
-        velY += Math.sin(angle + thrustOffset) * thrust;
-    }
-
-    // Reverse thrust
-    if (keys.ArrowDown) {
-        velX -= Math.cos(angle + thrustOffset) * thrust;
-        velY -= Math.sin(angle + thrustOffset) * thrust;
-    }
-
-    // Update position
-    posX += velX;
-    posY += velY;
-
-    // Friction
-    velX *= friction;
-    velY *= friction;
-
-    // Keep inside game area
-    posX = Math.max(0, Math.min(740, posX));
-    posY = Math.max(0, Math.min(540, posY));
-
-    // Apply to DOM
-    player.style.left = posX + "px";
-    player.style.top = posY + "px";
-    player.style.transform = `rotate(${angle}rad)`;
+    if (keys.w) py -= speed;
+    if (keys.s) py += speed;
+    if (keys.a) px -= speed;
+    if (keys.d) px += speed;
 }
 
-function moveWalls() {
-    for (let i = walls.length - 1; i >= 0; i--) {
-        const w = walls[i];
-        w.x -= 4;
-        w.element.style.left = w.x + "px";
+// Enemy AI
+function moveEnemy() {
+    const dx = px - ex;
+    const dy = py - ey;
+    const dist = Math.hypot(dx, dy);
 
-        // Remove off-screen walls
-        if (w.x < -50) {
-            w.element.remove();
-            walls.splice(i, 1);
-        }
-    }
+    ex += (dx / dist) * enemySpeed;
+    ey += (dy / dist) * enemySpeed;
+
+    enemySpeed += 0.0005; // slowly gets faster
 }
 
+// Camera system
+function updateCamera() {
+    const offsetX = 400 - px;
+    const offsetY = 300 - py;
+
+    playerEl.style.left = "400px";
+    playerEl.style.top = "300px";
+
+    enemyEl.style.left = (ex + offsetX) + "px";
+    enemyEl.style.top = (ey + offsetY) + "px";
+}
+
+// Collision
 function checkCollision() {
-    for (const w of walls) {
-        const px = posX + 30;
-        const py = posY + 30;
-
-        if (
-            px > w.x &&
-            px < w.x + 40 &&
-            py > w.y &&
-            py < w.y + w.height
-        ) {
-            gameOver();
-        }
-    }
+    const dx = px - ex;
+    const dy = py - ey;
+    if (Math.hypot(dx, dy) < 50) gameOver();
 }
 
+// Game over
 function gameOver() {
     if (score > highScore) {
         highScore = score;
-        highScoreDisplay.textContent = highScore;
+        highScoreEl.textContent = highScore;
 
-        // Send high score to ESP8266 OLED
         fetch(`/oled?text=High:${highScore}`);
     }
 
@@ -136,28 +77,26 @@ function gameOver() {
 }
 
 function resetGame() {
-    posX = 400;
-    posY = 300;
-    velX = 0;
-    velY = 0;
-    angle = 0;
-
+    px = 0;
+    py = 0;
+    ex = 300;
+    ey = 300;
+    enemySpeed = 1.5;
     score = 0;
-    scoreDisplay.textContent = score;
-
-    walls.forEach(w => w.element.remove());
-    walls = [];
+    scoreEl.textContent = score;
 }
 
-function gameLoop() {
+// Main loop
+function loop() {
     movePlayer();
-    moveWalls();
+    moveEnemy();
+    updateCamera();
     checkCollision();
 
     score++;
-    scoreDisplay.textContent = score;
+    scoreEl.textContent = score;
 
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(loop);
 }
 
-gameLoop();
+loop();
