@@ -11,13 +11,13 @@ let px = 0, py = 0;
 let velX = 0, velY = 0;
 let angle = 0;
 
-const thrust = 0.25;
+const thrust = 51;
 const friction = 0.98;
 const rotationSpeed = 0.08;
 
 // === ENEMY ===
 let ex = 0, ey = 0;
-let enemySpeed = 1.5;
+let enemySpeed = 50;
 
 // === INPUT ===
 const keys = { w: false, a: false, s: false, d: false };
