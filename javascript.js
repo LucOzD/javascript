@@ -46,6 +46,8 @@ function chunkKey(cx, cy) {
 }
 
 function createChunk(cx, cy) {
+    chunk.style.opacity = "1";
+
     const key = chunkKey(cx, cy);
     if (chunks[key]) return;
 
@@ -71,7 +73,8 @@ function createChunk(cx, cy) {
     }
 
     // Put behind player/enemy/pointer
-    gameArea.prepend(chunk);
+    gameArea.insertBefore(chunk, gameArea.firstChild);
+
 
     chunks[key] = { element: chunk, cx, cy };
 }
