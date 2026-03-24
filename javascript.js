@@ -35,7 +35,7 @@ let score = 0;
 let highScore = 0;
 
 // === CHUNK SYSTEM ===
-// mo.png is 645×646 but we stretch it to 2000×2000
+
 const TILE_SIZE = 2000;
 const CHUNK_SIZE = TILE_SIZE * 2; // 4000×4000 per chunk
 
@@ -58,11 +58,11 @@ function createChunk(cx, cy) {
     chunk.style.zIndex = "0";
     chunk.style.opacity = "1";
 
-    // 2×2 tiles of mo.png stretched to 2000×2000
+    
     for (let tx = 0; tx < 2; tx++) {
         for (let ty = 0; ty < 2; ty++) {
             const tile = document.createElement("img");
-            tile.src = "mo.png";
+            tile.src = "mo.webp";
             tile.style.position = "absolute";
             tile.style.left = (tx * TILE_SIZE) + "px";
             tile.style.top = (ty * TILE_SIZE) + "px";
