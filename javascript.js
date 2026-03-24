@@ -8,7 +8,9 @@ const highScoreEl = document.getElementById("highScore");
 // Player world position
 let px = 0;
 let py = 0;
+let angle = 0;
 const speed = 4;
+const rotationSpeed = 0.08;
 
 // Enemy world position
 let ex = 300;
@@ -26,10 +28,19 @@ let highScore = 0;
 
 // Movement
 function movePlayer() {
-    if (keys.w) py -= speed;
-    if (keys.s) py += speed;
-    if (keys.a) px -= speed;
-    if (keys.d) px += speed;
+    // Rotate left/right
+    if (keys.a) angle -= rotationSpeed;
+    if (keys.d) angle += rotationSpeed;
+
+    // Move forward/backward
+    if (keys.w) {
+        px += Math.cos(angle - Math.PI/2) * speed;
+        py += Math.sin(angle - Math.PI/2) * speed;
+    }
+    if (keys.s) {
+        px -= Math.cos(angle - Math.PI/2) * speed;
+        py -= Math.sin(angle - Math.PI/2) * speed;
+    }
 }
 
 // Enemy AI
@@ -42,61 +53,5 @@ function moveEnemy() {
     ey += (dy / dist) * enemySpeed;
 
     enemySpeed += 0.0005; // slowly gets faster
-}
 
-// Camera system
-function updateCamera() {
-    const offsetX = 400 - px;
-    const offsetY = 300 - py;
-
-    playerEl.style.left = "400px";
-    playerEl.style.top = "300px";
-
-    enemyEl.style.left = (ex + offsetX) + "px";
-    enemyEl.style.top = (ey + offsetY) + "px";
-}
-
-// Collision
-function checkCollision() {
-    const dx = px - ex;
-    const dy = py - ey;
-    if (Math.hypot(dx, dy) < 50) gameOver();
-}
-
-// Game over
-function gameOver() {
-    if (score > highScore) {
-        highScore = score;
-        highScoreEl.textContent = highScore;
-
-        fetch(`/oled?text=High:${highScore}`);
-    }
-
-    alert("GAME OVER!");
-    resetGame();
-}
-
-function resetGame() {
-    px = 0;
-    py = 0;
-    ex = 300;
-    ey = 300;
-    enemySpeed = 1.5;
-    score = 0;
-    scoreEl.textContent = score;
-}
-
-// Main loop
-function loop() {
-    movePlayer();
-    moveEnemy();
-    updateCamera();
-    checkCollision();
-
-    score++;
-    scoreEl.textContent = score;
-
-    requestAnimationFrame(loop);
-}
-
-loop();
+    // Rotate enemy
