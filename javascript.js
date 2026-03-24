@@ -1,10 +1,4 @@
 // DOM
-
-window.onerror = function(msg, url, line, col, error) {
-    console.log("JS ERROR:", msg, "line:", line, "col:", col);
-};
-
-
 const gameArea = document.getElementById("gameArea");
 const playerEl = document.getElementById("player");
 const enemyEl = document.getElementById("enemy");
@@ -52,17 +46,17 @@ function chunkKey(cx, cy) {
 }
 
 function createChunk(cx, cy) {
-    chunk.style.opacity = "1";
-
     const key = chunkKey(cx, cy);
     if (chunks[key]) return;
 
+    // Declare chunk FIRST (fixes ReferenceError)
     const chunk = document.createElement("div");
     chunk.className = "chunk";
     chunk.style.width = CHUNK_SIZE + "px";
     chunk.style.height = CHUNK_SIZE + "px";
     chunk.style.position = "absolute";
     chunk.style.zIndex = "0";
+    chunk.style.opacity = "1";
 
     // 2×2 tiles of mo.png stretched to 2000×2000
     for (let tx = 0; tx < 2; tx++) {
@@ -78,15 +72,13 @@ function createChunk(cx, cy) {
         }
     }
 
-    // Put behind player/enemy/pointer
-    // Always put chunks behind everything safely
-if (gameArea.firstChild) {
-    gameArea.insertBefore(chunk, gameArea.firstChild);
-} else {
-    gameArea.appendChild(chunk);
-}
-
-
+    // SAFE prepend (never errors, always behind player)
+    const firstElement = [...gameArea.childNodes].find(n => n.nodeType === 1);
+    if (firstElement) {
+        gameArea.insertBefore(chunk, firstElement);
+    } else {
+        gameArea.appendChild(chunk);
+    }
 
     chunks[key] = { element: chunk, cx, cy };
 }
@@ -130,8 +122,10 @@ function updateChunks() {
 // === ENEMY SPAWN (never on top of player) ===
 function spawnEnemy() {
     let distance = 0;
+    let tries = 0;
 
-    while (distance < 600) {
+    while (distance < 600 && tries < 50) {
+        tries++;
         const ang = Math.random() * Math.PI * 2;
         const dist = 600 + Math.random() * 800;
 
@@ -265,9 +259,6 @@ function resetGame() {
 
 // === MAIN LOOP ===
 function loop() {
-console.log("LOOP OK");
-
-
     movePlayer();
     moveEnemy();
     updateCamera();
