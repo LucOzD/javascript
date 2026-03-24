@@ -17,7 +17,7 @@ const rotationSpeed = 0.08;
 
 // === ENEMY ===
 let ex = 0, ey = 0;
-let enemySpeed = 150;
+let enemySpeed = 10;
 
 // === INPUT ===
 const keys = { w: false, a: false, s: false, d: false };
@@ -186,7 +186,7 @@ function spawnEnemy() {
         distance = Math.hypot(ex - px, ey - py);
     }
 
-    enemySpeed = 5;
+    enemySpeed = 10;
 }
 
 // === PLAYER MOVEMENT ===
