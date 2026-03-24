@@ -107,6 +107,8 @@ function createChunk(cx, cy) {
     chunk.style.width = CHUNK_SIZE + "px";
     chunk.style.height = CHUNK_SIZE + "px";
 
+  generateWalls(chunk, cx, cy);
+
     // Background tiles
     for (let tx = 0; tx < 2; tx++) {
         for (let ty = 0; ty < 2; ty++) {
