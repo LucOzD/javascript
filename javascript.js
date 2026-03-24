@@ -67,7 +67,7 @@ function getWallDensity(cx, cy) {
 
 function getWallCount(cx, cy) {
     const density = getWallDensity(cx, cy);
-    return Math.floor(5 + density * 20); // 5–25 walls
+    return Math.floor(5 + density * 150); // 5–25 walls
 }
 
 // === WALL GENERATION ===
@@ -113,7 +113,7 @@ function createChunk(cx, cy) {
     for (let tx = 0; tx < 2; tx++) {
         for (let ty = 0; ty < 2; ty++) {
             const tile = document.createElement("img");
-            tile.src = "mo.png";
+            tile.src = "mo.webp";
             tile.style.position = "absolute";
             tile.style.left = (tx * TILE_SIZE) + "px";
             tile.style.top = (ty * TILE_SIZE) + "px";
