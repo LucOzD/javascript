@@ -81,6 +81,9 @@ function createChunk(cx, cy) {
     }
 
     chunks[key] = { element: chunk, cx, cy };
+
+    chunk.style.zIndex = "-10";
+
 }
 
 function updateChunks() {
