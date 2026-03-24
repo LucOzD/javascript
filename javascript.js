@@ -1,4 +1,10 @@
 // DOM
+
+window.onerror = function(msg, url, line, col, error) {
+    console.log("JS ERROR:", msg, "line:", line, "col:", col);
+};
+
+
 const gameArea = document.getElementById("gameArea");
 const playerEl = document.getElementById("player");
 const enemyEl = document.getElementById("enemy");
@@ -259,6 +265,9 @@ function resetGame() {
 
 // === MAIN LOOP ===
 function loop() {
+console.log("LOOP OK");
+
+
     movePlayer();
     moveEnemy();
     updateCamera();
