@@ -186,7 +186,7 @@ function spawnEnemy() {
         distance = Math.hypot(ex - px, ey - py);
     }
 
-    enemySpeed = 10;
+    enemySpeed = 20;
 }
 
 // === PLAYER MOVEMENT ===
@@ -214,6 +214,8 @@ function movePlayer() {
 
 // === WALL COLLISION (player only) ===
 function handleWallCollision() {
+    const half = PLAYER_SIZE / 2;
+
     for (const key in chunks) {
         const chunk = chunks[key];
         const walls = chunk.element.querySelectorAll(".wall");
@@ -227,17 +229,42 @@ function handleWallCollision() {
             const ww = parseFloat(wall.style.width);
             const wh = parseFloat(wall.style.height);
 
-            if (px > wx - 30 && px < wx + ww + 30 &&
-                py > wy - 30 && py < wy + wh + 30) {
-
-                px -= velX * 2;
-                py -= velY * 2;
-                velX = 0;
-                velY = 0;
+            // AABB collision
+            if (
+                px + half > wx &&
+                px - half < wx + ww &&
+                py + half > wy &&
+                py - half < wy + wh
+            ) {
+                // Push player out of the wall
+                resolveCollision(wx, wy, ww, wh, half);
             }
         });
     }
 }
+
+function resolveCollision(wx, wy, ww, wh, half) {
+    const left   = (px + half) - wx;
+    const right  = (wx + ww) - (px - half);
+    const top    = (py + half) - wy;
+    const bottom = (wy + wh) - (py - half);
+
+    const minPen = Math.min(left, right, top, bottom);
+
+    if (minPen === left) {
+        px = wx - half;
+    } else if (minPen === right) {
+        px = wx + ww + half;
+    } else if (minPen === top) {
+        py = wy - half;
+    } else if (minPen === bottom) {
+        py = wy + wh + half;
+    }
+
+    velX = 0;
+    velY = 0;
+}
+
 
 // === ENEMY AI ===
 function moveEnemy() {
