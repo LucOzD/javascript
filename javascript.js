@@ -1,4 +1,5 @@
 // DOM
+const PLAYER_SIZE = 60; // or whatever your player sprite size is in pixels
 const gameArea = document.getElementById("gameArea");
 const playerEl = document.getElementById("player");
 const enemyEl = document.getElementById("enemy");
