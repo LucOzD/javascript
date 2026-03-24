@@ -1,11 +1,13 @@
 // DOM
-const PLAYER_SIZE = 60; // or whatever your player sprite size is in pixels
+const PLAYER_SIZE = 60;
 const gameArea = document.getElementById("gameArea");
 const playerEl = document.getElementById("player");
 const enemyEl = document.getElementById("enemy");
 const pointerEl = document.getElementById("pointer");
 const scoreEl = document.getElementById("score");
 const highScoreEl = document.getElementById("highScore");
+
+let currentWall = null;
 
 // === PLAYER PHYSICS ===
 let px = 0, py = 0;
@@ -45,14 +47,14 @@ function chunkKey(cx, cy) {
     return `${cx},${cy}`;
 }
 
-// === DETERMINISTIC HASH (for walls + clumping + black holes) ===
+// === DETERMINISTIC HASH ===
 function hash2D(x, y) {
     let n = x * 374761393 + y * 668265263;
     n = (n ^ (n >> 13)) * 1274126177;
     return ((n ^ (n >> 16)) >>> 0) / 4294967295;
 }
 
-// === WALL DENSITY (clumping) ===
+// === WALL DENSITY ===
 function getWallDensity(cx, cy) {
     const base = hash2D(cx, cy);
 
@@ -62,13 +64,14 @@ function getWallDensity(cx, cy) {
     const n4 = hash2D(cx, cy + 1);
 
     const neighborAvg = (n1 + n2 + n3 + n4) / 4;
+    const wobble = hash2D(cx * 3, cy * 5) * 0.4;
 
-    return neighborAvg * 0.7 + base * 0.3;
+    return neighborAvg * 0.55 + base * 0.25 + wobble * 0.2;
 }
 
 function getWallCount(cx, cy) {
     const density = getWallDensity(cx, cy);
-    return Math.floor(40 + density * 200); // 40–240 walls
+    return Math.floor(150 + density * 600); // 150–750 walls
 }
 
 // === WALL GENERATION ===
@@ -94,7 +97,89 @@ function generateWalls(chunk, cx, cy) {
         wall.style.width = w + "px";
         wall.style.height = h + "px";
 
+        // ALL WALLS MOVE
+        wall.dataset.dynamic = "1";
+
         chunk.appendChild(wall);
+    }
+}
+
+// === DYNAMIC WALL DRIFT ===
+function updateDynamicWalls() {
+    for (const key in chunks) {
+        const chunk = chunks[key];
+        const walls = chunk.element.querySelectorAll(".wall");
+
+        walls.forEach(wall => {
+            let x = parseFloat(wall.style.left);
+            let y = parseFloat(wall.style.top);
+
+            x += (Math.random() - 0.5) * 0.4;
+            y += (Math.random() - 0.5) * 0.4;
+
+            wall.style.left = x + "px";
+            wall.style.top = y + "px";
+        });
+    }
+}
+
+// === BLACK HOLES ===
+const blackHoles = [];
+
+function trySpawnBlackHole(cx, cy, chunkElement) {
+    const chance = hash2D(cx * 99, cy * 77);
+
+    if (chance < 0.6) return; // ~1 hole per 2.5 chunks
+
+    const r1 = hash2D(cx * 13, cy * 17);
+    const r2 = hash2D(cx * 19, cy * 23);
+
+    const x = r1 * CHUNK_SIZE;
+    const y = r2 * CHUNK_SIZE;
+
+    const radius = 450;
+    const core = 120;
+    const strength = 0.03;
+
+    const el = document.createElement("div");
+    el.className = "blackHole";
+    el.style.position = "absolute";
+    el.style.width = "160px";
+    el.style.height = "160px";
+    el.style.borderRadius = "50%";
+    el.style.backgroundImage = 'url("jelly.webp")';
+    el.style.backgroundSize = "cover";
+    el.style.backgroundPosition = "center";
+    el.style.zIndex = "900";
+
+    chunkElement.appendChild(el);
+
+    blackHoles.push({
+        x: cx * CHUNK_SIZE + x,
+        y: cy * CHUNK_SIZE + y,
+        radius,
+        core,
+        strength,
+        el
+    });
+}
+
+function applyBlackHoles() {
+    for (const bh of blackHoles) {
+        const dx = bh.x - px;
+        const dy = bh.y - py;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < bh.radius && dist > 1) {
+            const pull = bh.strength * (1 - dist / bh.radius);
+            velX += (dx / dist) * pull;
+            velY += (dy / dist) * pull;
+        }
+
+        if (dist < bh.core && dist > 1) {
+            velX = -(dx / dist) * 25;
+            velY = -(dy / dist) * 25;
+        }
     }
 }
 
@@ -122,10 +207,9 @@ function createChunk(cx, cy) {
         }
     }
 
-    // === ADD WALLS ===
     generateWalls(chunk, cx, cy);
+    trySpawnBlackHole(cx, cy, chunk);
 
-    // Insert behind player
     const firstElement = [...gameArea.childNodes].find(n => n.nodeType === 1);
     if (firstElement) gameArea.insertBefore(chunk, firstElement);
     else gameArea.appendChild(chunk);
@@ -167,6 +251,13 @@ function updateChunks() {
         c.element.style.left = (c.cx * CHUNK_SIZE + offsetX) + "px";
         c.element.style.top  = (c.cy * CHUNK_SIZE + offsetY) + "px";
     }
+
+    for (const bh of blackHoles) {
+        const sx = bh.x + offsetX;
+        const sy = bh.y + offsetY;
+        bh.el.style.left = sx + "px";
+        bh.el.style.top  = sy + "px";
+    }
 }
 
 // === ENEMY SPAWN ===
@@ -202,7 +293,7 @@ function movePlayer() {
         velY -= Math.sin(angle - Math.PI/2) * thrust;
     }
 
-    applyBlackHoles(); // gravity + slingshot
+    applyBlackHoles();
 
     px += velX;
     py += velY;
@@ -213,7 +304,7 @@ function movePlayer() {
     handleWallCollision();
 }
 
-// === WALL COLLISION (player only) ===
+// === WALL COLLISION ===
 function handleWallCollision() {
     const half = PLAYER_SIZE / 2;
 
@@ -236,6 +327,7 @@ function handleWallCollision() {
                 py + half > wy &&
                 py - half < wy + wh
             ) {
+                currentWall = wall;
                 resolveCollision(wx, wy, ww, wh, half);
             }
         });
@@ -260,6 +352,17 @@ function resolveCollision(wx, wy, ww, wh, half) {
         py = wy + wh + half;
     }
 
+    // Push dynamic wall
+    if (currentWall) {
+        const pushX = (px - (wx + ww / 2)) * 0.3;
+        const pushY = (py - (wy + wh / 2)) * 0.3;
+
+        currentWall.style.left =
+            (parseFloat(currentWall.style.left) + pushX) + "px";
+        currentWall.style.top =
+            (parseFloat(currentWall.style.top) + pushY) + "px";
+    }
+
     velX = 0;
     velY = 0;
 }
@@ -277,83 +380,6 @@ function moveEnemy() {
 
     const enemyAngle = Math.atan2(dy, dx) + Math.PI/2;
     enemyEl.style.transform = `rotate(${enemyAngle}rad)`;
-}
-
-// === BLACK HOLES ===
-const blackHoles = [];
-
-function initBlackHoles() {
-    // Example: 5 black holes scattered using hash2D so it's deterministic
-    for (let i = 0; i < 5; i++) {
-        const ang = hash2D(i, 1) * Math.PI * 2;
-        const dist = 4000 + hash2D(i, 2) * 8000;
-
-        const x = Math.cos(ang) * dist;
-        const y = Math.sin(ang) * dist;
-
-        const radius = 350;
-        const core = 90;
-        const strength = 0.02;
-
-        const el = document.createElement("div");
-        el.className = "blackHole";
-        el.style.position = "absolute";
-        el.style.width = "140px";
-        el.style.height = "140px";
-        el.style.borderRadius = "50%";
-        el.style.backgroundImage = 'url("jelly.webp")';
-        el.style.backgroundSize = "cover";
-        el.style.backgroundPosition = "center";
-        el.style.zIndex = "900";
-
-        gameArea.appendChild(el);
-
-        blackHoles.push({ x, y, radius, core, strength, el });
-    }
-}
-
-function applyBlackHoles() {
-    for (const bh of blackHoles) {
-        const dx = bh.x - px;
-        const dy = bh.y - py;
-        const dist = Math.hypot(dx, dy);
-
-        if (dist < bh.radius && dist > 1) {
-            const pull = bh.strength * (1 - dist / bh.radius);
-            velX += (dx / dist) * pull;
-            velY += (dy / dist) * pull;
-        }
-
-        if (dist < bh.core && dist > 1) {
-            velX = -(dx / dist) * 25;
-            velY = -(dy / dist) * 25;
-        }
-    }
-}
-
-function updateBlackHolesCamera(offsetX, offsetY) {
-    for (const bh of blackHoles) {
-        const sx = bh.x + offsetX;
-        const sy = bh.y + offsetY;
-        bh.el.style.left = sx + "px";
-        bh.el.style.top  = sy + "px";
-    }
-}
-
-// === CAMERA ===
-function updateCamera() {
-    const offsetX = 400 - px;
-    const offsetY = 300 - py;
-
-    playerEl.style.left = "400px";
-    playerEl.style.top = "300px";
-    playerEl.style.transform = `rotate(${angle}rad)`;
-
-    enemyEl.style.left = (ex + offsetX) + "px";
-    enemyEl.style.top  = (ey + offsetY) + "px";
-
-    updatePointer(offsetX, offsetY);
-    updateBlackHolesCamera(offsetX, offsetY);
 }
 
 // === POINTER ===
@@ -424,8 +450,9 @@ function resetGame() {
 function loop() {
     movePlayer();
     moveEnemy();
-    updateCamera();
     updateChunks();
+    updatePointer(400 - px, 300 - py);
+    updateDynamicWalls();
     checkCollision();
 
     score++;
@@ -434,6 +461,5 @@ function loop() {
     requestAnimationFrame(loop);
 }
 
-initBlackHoles();
 spawnEnemy();
 loop();
