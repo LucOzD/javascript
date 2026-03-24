@@ -35,7 +35,7 @@ let score = 0;
 let highScore = 0;
 
 // === CHUNK SYSTEM ===
-// mo.png is stretched to 2000×2000
+// mo.png is 645×646 but we stretch it to 2000×2000
 const TILE_SIZE = 2000;
 const CHUNK_SIZE = TILE_SIZE * 2; // 4000×4000 per chunk
 
@@ -53,8 +53,10 @@ function createChunk(cx, cy) {
     chunk.className = "chunk";
     chunk.style.width = CHUNK_SIZE + "px";
     chunk.style.height = CHUNK_SIZE + "px";
+    chunk.style.position = "absolute";
+    chunk.style.zIndex = "0";
 
-    // 2×2 tiles of mo.png
+    // 2×2 tiles of mo.png stretched to 2000×2000
     for (let tx = 0; tx < 2; tx++) {
         for (let ty = 0; ty < 2; ty++) {
             const tile = document.createElement("img");
@@ -91,7 +93,7 @@ function updateChunks() {
         }
     }
 
-    // Remove chunks not needed
+    // Remove unused chunks
     for (const key in chunks) {
         if (!needed.has(key)) {
             chunks[key].element.remove();
@@ -108,6 +110,23 @@ function updateChunks() {
         c.element.style.left = (c.cx * CHUNK_SIZE + offsetX) + "px";
         c.element.style.top  = (c.cy * CHUNK_SIZE + offsetY) + "px";
     }
+}
+
+// === ENEMY SPAWN (never on top of player) ===
+function spawnEnemy() {
+    let distance = 0;
+
+    while (distance < 600) {
+        const ang = Math.random() * Math.PI * 2;
+        const dist = 600 + Math.random() * 800;
+
+        ex = px + Math.cos(ang) * dist;
+        ey = py + Math.sin(ang) * dist;
+
+        distance = Math.hypot(ex - px, ey - py);
+    }
+
+    enemySpeed = 1.5;
 }
 
 // === PLAYER MOVEMENT (DRIFT) ===
@@ -151,12 +170,16 @@ function updateCamera() {
     const offsetX = 400 - px;
     const offsetY = 300 - py;
 
+    // Player centered
     playerEl.style.left = "400px";
     playerEl.style.top = "300px";
     playerEl.style.transform = `rotate(${angle}rad)`;
+    playerEl.style.zIndex = "1000";
 
+    // Enemy relative to camera
     enemyEl.style.left = (ex + offsetX) + "px";
     enemyEl.style.top  = (ey + offsetY) + "px";
+    enemyEl.style.zIndex = "900";
 
     updatePointer(offsetX, offsetY);
 }
@@ -187,6 +210,7 @@ function updatePointer(offsetX, offsetY) {
     pointerEl.style.left = px2 + "px";
     pointerEl.style.top  = py2 + "px";
     pointerEl.style.transform = `rotate(${ang + Math.PI/2}rad)`;
+    pointerEl.style.zIndex = "950";
 }
 
 // === COLLISION ===
