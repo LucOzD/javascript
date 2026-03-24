@@ -103,6 +103,7 @@ function updateChunks() {
     }
 }
 
+
 // Enemy spawn
 function spawnEnemy() {
     const distance = 600 + Math.random() * 300;
@@ -155,15 +156,19 @@ function updateCamera() {
     const offsetX = 400 - px;
     const offsetY = 300 - py;
 
+    // Player stays centered
     playerEl.style.left = "400px";
     playerEl.style.top = "300px";
     playerEl.style.transform = `rotate(${angle}rad)`;
 
+    // Enemy moves relative to camera
     enemyEl.style.left = (ex + offsetX) + "px";
     enemyEl.style.top = (ey + offsetY) + "px";
 
+    // Pointer update
     updatePointer(offsetX, offsetY);
 }
+
 
 // Pointer logic
 function updatePointer(offsetX, offsetY) {
