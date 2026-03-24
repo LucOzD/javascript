@@ -2,6 +2,7 @@
 const gameArea = document.getElementById("gameArea");
 const playerEl = document.getElementById("player");
 const enemyEl = document.getElementById("enemy");
+const pointerEl = document.getElementById("pointer");
 const scoreEl = document.getElementById("score");
 const highScoreEl = document.getElementById("highScore");
 
@@ -29,7 +30,7 @@ let highScore = 0;
 
 // Spawn enemy far away
 function spawnEnemy() {
-    const distance = 600 + Math.random() * 300; // 600–900px away
+    const distance = 600 + Math.random() * 300;
     const ang = Math.random() * Math.PI * 2;
 
     ex = px + Math.cos(ang) * distance;
@@ -40,11 +41,9 @@ function spawnEnemy() {
 
 // Player movement
 function movePlayer() {
-    // Rotate left/right
     if (keys.a) angle -= rotationSpeed;
     if (keys.d) angle += rotationSpeed;
 
-    // Move forward/backward
     if (keys.w) {
         px += Math.cos(angle - Math.PI/2) * moveSpeed;
         py += Math.sin(angle - Math.PI/2) * moveSpeed;
@@ -64,26 +63,56 @@ function moveEnemy() {
     ex += (dx / dist) * enemySpeed;
     ey += (dy / dist) * enemySpeed;
 
-    enemySpeed += 0.0005; // slowly gets faster
+    enemySpeed += 0.0005;
 
-    // Rotate enemy to face player
     const enemyAngle = Math.atan2(dy, dx) + Math.PI/2;
     enemyEl.style.transform = `rotate(${enemyAngle}rad)`;
 }
 
-// Camera system (NO ROTATION)
+// Camera system
 function updateCamera() {
     const offsetX = 400 - px;
     const offsetY = 300 - py;
 
-    // Player stays centered
     playerEl.style.left = "400px";
     playerEl.style.top = "300px";
     playerEl.style.transform = `rotate(${angle}rad)`;
 
-    // Enemy moves relative to camera
     enemyEl.style.left = (ex + offsetX) + "px";
     enemyEl.style.top = (ey + offsetY) + "px";
+
+    updatePointer(offsetX, offsetY);
+}
+
+// Pointer logic
+function updatePointer(offsetX, offsetY) {
+    const screenX = ex + offsetX;
+    const screenY = ey + offsetY;
+
+    const onScreen =
+        screenX > 0 && screenX < 800 &&
+        screenY > 0 && screenY < 600;
+
+    if (onScreen) {
+        pointerEl.style.display = "none";
+        return;
+    }
+
+    pointerEl.style.display = "block";
+
+    // Angle from player to enemy
+    const dx = screenX - 400;
+    const dy = screenY - 300;
+    const ang = Math.atan2(dy, dx);
+
+    // Position pointer on screen edge
+    const edgeDist = 250; // distance from center
+    const px2 = 400 + Math.cos(ang) * edgeDist;
+    const py2 = 300 + Math.sin(ang) * edgeDist;
+
+    pointerEl.style.left = px2 + "px";
+    pointerEl.style.top = py2 + "px";
+    pointerEl.style.transform = `rotate(${ang + Math.PI/2}rad)`;
 }
 
 // Collision detection
@@ -102,7 +131,6 @@ function gameOver() {
         highScore = score;
         highScoreEl.textContent = highScore;
 
-        // Send high score to ESP8266 OLED
         fetch(`/oled?text=High:${highScore}`);
     }
 
