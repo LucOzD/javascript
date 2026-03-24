@@ -68,7 +68,7 @@ function getWallDensity(cx, cy) {
 
 function getWallCount(cx, cy) {
     const density = getWallDensity(cx, cy);
-    return Math.floor(5 + density * 150); // 5–25 walls
+    return Math.floor(40 + density * 200); // 40–240 walls
 }
 
 // === WALL GENERATION ===
@@ -77,8 +77,8 @@ function generateWalls(chunk, cx, cy) {
     const seed = cx * 928371 + cy * 123133;
 
     for (let i = 0; i < count; i++) {
-        const r1 = hash2D(seed, i * 3);
-        const r2 = hash2D(seed, i * 3 + 1);
+        const r1 = hash2D(seed + i * 17, i * 3);
+        const r2 = hash2D(seed + i * 31, i * 3 + 1);
         const r3 = hash2D(seed, i * 3 + 2);
 
         const w = 60 + r3 * 120;
