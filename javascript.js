@@ -35,9 +35,9 @@ let score = 0;
 let highScore = 0;
 
 // === CHUNK SYSTEM ===
-// Set this to the pixel size of mo.png (width = height)
-const TILE_SIZE = 512;          // <-- change if your mo.png is a different size
-const CHUNK_SIZE = TILE_SIZE * 2; // 2x2 tiles per chunk
+// mo.png is stretched to 2000×2000
+const TILE_SIZE = 2000;
+const CHUNK_SIZE = TILE_SIZE * 2; // 4000×4000 per chunk
 
 let chunks = {};
 
@@ -54,7 +54,7 @@ function createChunk(cx, cy) {
     chunk.style.width = CHUNK_SIZE + "px";
     chunk.style.height = CHUNK_SIZE + "px";
 
-    // 2x2 tiles of mo.png
+    // 2×2 tiles of mo.png
     for (let tx = 0; tx < 2; tx++) {
         for (let ty = 0; ty < 2; ty++) {
             const tile = document.createElement("img");
@@ -80,7 +80,7 @@ function updateChunks() {
 
     const needed = new Set();
 
-    // 3x3 chunks around player
+    // Load 3×3 chunks around player
     for (let dx = -1; dx <= 1; dx++) {
         for (let dy = -1; dy <= 1; dy++) {
             const cx = playerChunkX + dx;
@@ -91,7 +91,7 @@ function updateChunks() {
         }
     }
 
-    // Remove unused chunks
+    // Remove chunks not needed
     for (const key in chunks) {
         if (!needed.has(key)) {
             chunks[key].element.remove();
@@ -106,19 +106,8 @@ function updateChunks() {
     for (const key in chunks) {
         const c = chunks[key];
         c.element.style.left = (c.cx * CHUNK_SIZE + offsetX) + "px";
-        c.element.style.top = (c.cy * CHUNK_SIZE + offsetY) + "px";
+        c.element.style.top  = (c.cy * CHUNK_SIZE + offsetY) + "px";
     }
-}
-
-// === ENEMY SPAWN ===
-function spawnEnemy() {
-    const distance = 600 + Math.random() * 300;
-    const ang = Math.random() * Math.PI * 2;
-
-    ex = px + Math.cos(ang) * distance;
-    ey = py + Math.sin(ang) * distance;
-
-    enemySpeed = 1.5;
 }
 
 // === PLAYER MOVEMENT (DRIFT) ===
@@ -127,12 +116,12 @@ function movePlayer() {
     if (keys.d) angle += rotationSpeed;
 
     if (keys.w) {
-        velX += Math.cos(angle - Math.PI / 2) * thrust;
-        velY += Math.sin(angle - Math.PI / 2) * thrust;
+        velX += Math.cos(angle - Math.PI/2) * thrust;
+        velY += Math.sin(angle - Math.PI/2) * thrust;
     }
     if (keys.s) {
-        velX -= Math.cos(angle - Math.PI / 2) * thrust;
-        velY -= Math.sin(angle - Math.PI / 2) * thrust;
+        velX -= Math.cos(angle - Math.PI/2) * thrust;
+        velY -= Math.sin(angle - Math.PI/2) * thrust;
     }
 
     px += velX;
@@ -153,7 +142,7 @@ function moveEnemy() {
 
     enemySpeed += 0.0005;
 
-    const enemyAngle = Math.atan2(dy, dx) + Math.PI / 2;
+    const enemyAngle = Math.atan2(dy, dx) + Math.PI/2;
     enemyEl.style.transform = `rotate(${enemyAngle}rad)`;
 }
 
@@ -162,14 +151,12 @@ function updateCamera() {
     const offsetX = 400 - px;
     const offsetY = 300 - py;
 
-    // Player centered
     playerEl.style.left = "400px";
     playerEl.style.top = "300px";
     playerEl.style.transform = `rotate(${angle}rad)`;
 
-    // Enemy relative to camera
     enemyEl.style.left = (ex + offsetX) + "px";
-    enemyEl.style.top = (ey + offsetY) + "px";
+    enemyEl.style.top  = (ey + offsetY) + "px";
 
     updatePointer(offsetX, offsetY);
 }
@@ -198,8 +185,8 @@ function updatePointer(offsetX, offsetY) {
     const py2 = 300 + Math.sin(ang) * edgeDist;
 
     pointerEl.style.left = px2 + "px";
-    pointerEl.style.top = py2 + "px";
-    pointerEl.style.transform = `rotate(${ang + Math.PI / 2}rad)`;
+    pointerEl.style.top  = py2 + "px";
+    pointerEl.style.transform = `rotate(${ang + Math.PI/2}rad)`;
 }
 
 // === COLLISION ===
@@ -212,7 +199,7 @@ function checkCollision() {
     }
 }
 
-// === GAME OVER / RESET ===
+// === GAME OVER ===
 function gameOver() {
     if (score > highScore) {
         highScore = score;
@@ -251,6 +238,5 @@ function loop() {
     requestAnimationFrame(loop);
 }
 
-// START
 spawnEnemy();
 loop();
