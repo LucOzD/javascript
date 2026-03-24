@@ -73,7 +73,13 @@ function createChunk(cx, cy) {
     }
 
     // Put behind player/enemy/pointer
+    // Always put chunks behind everything safely
+if (gameArea.firstChild) {
     gameArea.insertBefore(chunk, gameArea.firstChild);
+} else {
+    gameArea.appendChild(chunk);
+}
+
 
 
     chunks[key] = { element: chunk, cx, cy };
