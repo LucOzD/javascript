@@ -74,15 +74,26 @@ function updateCamera() {
     const offsetX = 400 - px;
     const offsetY = 300 - py;
 
+    // Player stays centered
     playerEl.style.left = "400px";
     playerEl.style.top = "300px";
     playerEl.style.transform = `rotate(${angle}rad)`;
 
+    // Enemy moves relative to camera
     enemyEl.style.left = (ex + offsetX) + "px";
     enemyEl.style.top = (ey + offsetY) + "px";
 
+    // Background scroll (infinite tiling)
+    const bgX = -px % 2000;
+    const bgY = -py % 2000;
+
+    background.style.left = (bgX - 1000) + "px";
+    background.style.top = (bgY - 1000) + "px";
+
+    // Pointer update
     updatePointer(offsetX, offsetY);
 }
+
 
 // Pointer logic
 function updatePointer(offsetX, offsetY) {

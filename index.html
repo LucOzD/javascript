@@ -34,6 +34,19 @@
             height: 40px;
             display: none;
         }
+         #background {
+          position: absolute;
+          width: 2000px;
+         height: 2000px;
+           left: -600px;
+          top: -700px;
+        background-image: url('tile.png');
+          background-repeat: repeat;
+            opacity: 0.25; /* optional, looks nice */
+          pointer-events: none;
+        }
+
+        
     </style>
 </head>
 <body>
@@ -44,6 +57,8 @@
 <p>High Score: <span id="highScore">0</span></p>
 
 <div id="gameArea">
+  <div id="background"></div>
+
     <img id="player" src="me.png">
     <img id="enemy" src="cris.png">
     <img id="pointer" src="pointer.png">
