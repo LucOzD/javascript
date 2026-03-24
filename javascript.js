@@ -187,7 +187,7 @@ function spawnEnemy() {
         distance = Math.hypot(ex - px, ey - py);
     }
 
-    enemySpeed = 10;
+    enemySpeed = 20;
 }
 
 // === PLAYER MOVEMENT ===
