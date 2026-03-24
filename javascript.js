@@ -3,8 +3,10 @@ const gameArea = document.getElementById("gameArea");
 const playerEl = document.getElementById("player");
 const enemyEl = document.getElementById("enemy");
 const pointerEl = document.getElementById("pointer");
+const scoreEl = document.getElementById("score");
+const highScoreEl = document.getElementById("highScore");
 
-// Player physics
+// === PLAYER PHYSICS ===
 let px = 0, py = 0;
 let velX = 0, velY = 0;
 let angle = 0;
@@ -13,22 +15,30 @@ const thrust = 0.25;
 const friction = 0.98;
 const rotationSpeed = 0.08;
 
-// Enemy
+// === ENEMY ===
 let ex = 0, ey = 0;
 let enemySpeed = 1.5;
 
-// Input
+// === INPUT ===
 const keys = { w: false, a: false, s: false, d: false };
-document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
-document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+document.addEventListener("keydown", e => {
+    const k = e.key.toLowerCase();
+    if (k in keys) keys[k] = true;
+});
+document.addEventListener("keyup", e => {
+    const k = e.key.toLowerCase();
+    if (k in keys) keys[k] = false;
+});
 
-// Score
+// === SCORE ===
 let score = 0;
 let highScore = 0;
 
-// Chunk system
-const TILE_SIZE = 256;
-const CHUNK_SIZE = TILE_SIZE * 2; // 512px
+// === CHUNK SYSTEM ===
+// Set this to the pixel size of mo.png (width = height)
+const TILE_SIZE = 512;          // <-- change if your mo.png is a different size
+const CHUNK_SIZE = TILE_SIZE * 2; // 2x2 tiles per chunk
+
 let chunks = {};
 
 function chunkKey(cx, cy) {
@@ -40,11 +50,11 @@ function createChunk(cx, cy) {
     if (chunks[key]) return;
 
     const chunk = document.createElement("div");
-    chunk.style.position = "absolute";
+    chunk.className = "chunk";
     chunk.style.width = CHUNK_SIZE + "px";
     chunk.style.height = CHUNK_SIZE + "px";
 
-    // Add 2x2 tiles
+    // 2x2 tiles of mo.png
     for (let tx = 0; tx < 2; tx++) {
         for (let ty = 0; ty < 2; ty++) {
             const tile = document.createElement("img");
@@ -58,13 +68,10 @@ function createChunk(cx, cy) {
         }
     }
 
-    gameArea.appendChild(chunk);
+    // Put behind player/enemy/pointer
+    gameArea.prepend(chunk);
 
-    chunks[key] = {
-        element: chunk,
-        cx,
-        cy
-    };
+    chunks[key] = { element: chunk, cx, cy };
 }
 
 function updateChunks() {
@@ -73,7 +80,7 @@ function updateChunks() {
 
     const needed = new Set();
 
-    // Load 3x3 chunks around player
+    // 3x3 chunks around player
     for (let dx = -1; dx <= 1; dx++) {
         for (let dy = -1; dy <= 1; dy++) {
             const cx = playerChunkX + dx;
@@ -84,7 +91,7 @@ function updateChunks() {
         }
     }
 
-    // Remove chunks not needed
+    // Remove unused chunks
     for (const key in chunks) {
         if (!needed.has(key)) {
             chunks[key].element.remove();
@@ -92,19 +99,18 @@ function updateChunks() {
         }
     }
 
-    // Position chunks
+    // Position chunks relative to camera
+    const offsetX = 400 - px;
+    const offsetY = 300 - py;
+
     for (const key in chunks) {
         const c = chunks[key];
-        const offsetX = 400 - px;
-        const offsetY = 300 - py;
-
         c.element.style.left = (c.cx * CHUNK_SIZE + offsetX) + "px";
         c.element.style.top = (c.cy * CHUNK_SIZE + offsetY) + "px";
     }
 }
 
-
-// Enemy spawn
+// === ENEMY SPAWN ===
 function spawnEnemy() {
     const distance = 600 + Math.random() * 300;
     const ang = Math.random() * Math.PI * 2;
@@ -115,18 +121,18 @@ function spawnEnemy() {
     enemySpeed = 1.5;
 }
 
-// Player movement (with drift)
+// === PLAYER MOVEMENT (DRIFT) ===
 function movePlayer() {
     if (keys.a) angle -= rotationSpeed;
     if (keys.d) angle += rotationSpeed;
 
     if (keys.w) {
-        velX += Math.cos(angle - Math.PI/2) * thrust;
-        velY += Math.sin(angle - Math.PI/2) * thrust;
+        velX += Math.cos(angle - Math.PI / 2) * thrust;
+        velY += Math.sin(angle - Math.PI / 2) * thrust;
     }
     if (keys.s) {
-        velX -= Math.cos(angle - Math.PI/2) * thrust;
-        velY -= Math.sin(angle - Math.PI/2) * thrust;
+        velX -= Math.cos(angle - Math.PI / 2) * thrust;
+        velY -= Math.sin(angle - Math.PI / 2) * thrust;
     }
 
     px += velX;
@@ -136,7 +142,7 @@ function movePlayer() {
     velY *= friction;
 }
 
-// Enemy AI
+// === ENEMY AI ===
 function moveEnemy() {
     const dx = px - ex;
     const dy = py - ey;
@@ -147,30 +153,27 @@ function moveEnemy() {
 
     enemySpeed += 0.0005;
 
-    const enemyAngle = Math.atan2(dy, dx) + Math.PI/2;
+    const enemyAngle = Math.atan2(dy, dx) + Math.PI / 2;
     enemyEl.style.transform = `rotate(${enemyAngle}rad)`;
 }
 
-// Camera + pointer
+// === CAMERA + POINTER ===
 function updateCamera() {
     const offsetX = 400 - px;
     const offsetY = 300 - py;
 
-    // Player stays centered
+    // Player centered
     playerEl.style.left = "400px";
     playerEl.style.top = "300px";
     playerEl.style.transform = `rotate(${angle}rad)`;
 
-    // Enemy moves relative to camera
+    // Enemy relative to camera
     enemyEl.style.left = (ex + offsetX) + "px";
     enemyEl.style.top = (ey + offsetY) + "px";
 
-    // Pointer update
     updatePointer(offsetX, offsetY);
 }
 
-
-// Pointer logic
 function updatePointer(offsetX, offsetY) {
     const screenX = ex + offsetX;
     const screenY = ey + offsetY;
@@ -196,10 +199,10 @@ function updatePointer(offsetX, offsetY) {
 
     pointerEl.style.left = px2 + "px";
     pointerEl.style.top = py2 + "px";
-    pointerEl.style.transform = `rotate(${ang + Math.PI/2}rad)`;
+    pointerEl.style.transform = `rotate(${ang + Math.PI / 2}rad)`;
 }
 
-// Collision
+// === COLLISION ===
 function checkCollision() {
     const dx = px - ex;
     const dy = py - ey;
@@ -209,7 +212,7 @@ function checkCollision() {
     }
 }
 
-// Game over
+// === GAME OVER / RESET ===
 function gameOver() {
     if (score > highScore) {
         highScore = score;
@@ -234,7 +237,7 @@ function resetGame() {
     spawnEnemy();
 }
 
-// Main loop
+// === MAIN LOOP ===
 function loop() {
     movePlayer();
     moveEnemy();
@@ -248,5 +251,6 @@ function loop() {
     requestAnimationFrame(loop);
 }
 
+// START
 spawnEnemy();
 loop();
