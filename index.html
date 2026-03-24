@@ -1,23 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Move the six seven!</title>
+    <title>Wall Dodger</title>
     <style>
         body {
-            background-color: rgb(230, 173, 221);
+            background-color: #111;
+            color: #0f0;
+            font-family: monospace;
+            text-align: center;
         }
-        #image1 {
+        #gameArea {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            background: #222;
+            margin: auto;
+            overflow: hidden;
+            border: 3px solid #0f0;
+        }
+        #player {
             position: absolute;
-            left: 0px;
-            top: 0px;
-            height: 69px;
-            width: 69px;
+            width: 60px;
+            height: 60px;
+        }
+        .wall {
+            position: absolute;
+            background: #f00;
         }
     </style>
 </head>
 <body>
-    <h1>Use the arrow keys to move the Lucas Daniel Sebastian Drane!</h1>
-    <img id="image1" src="me.png" alt="Lucas Daniel Sebastian Drane">
-    <script src="javascript.js"></script>
+
+<h1>Wall Dodger</h1>
+<p>Use arrow keys to rotate + thrust</p>
+<p>Score: <span id="score">0</span></p>
+<p>High Score: <span id="highScore">0</span></p>
+
+<div id="gameArea">
+    <img id="player" src="me.png">
+</div>
+
+<script src="javascript.js"></script>
+
 </body>
 </html>

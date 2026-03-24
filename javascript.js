@@ -1,78 +1,163 @@
-// Get the image element
-const img = document.getElementById("image1");
+// DOM elements
+const gameArea = document.getElementById("gameArea");
+const player = document.getElementById("player");
+const scoreDisplay = document.getElementById("score");
+const highScoreDisplay = document.getElementById("highScore");
 
-// Starting position and movement values
-let posX = 300;
+// Player physics
+let posX = 400;
 let posY = 300;
-let angle = 0; // in radians
-let velocityX = 0;
-let velocityY = 0;
+let angle = 0;
+let velX = 0;
+let velY = 0;
 
-const thrustPower = 0.2;          // How strong the thrust is
-const friction = 0.99;            // Friction to slow down over time
-const rotationSpeed = 0.05;       // How fast the ship rotates
-const thrustOffset = -Math.PI / 2; // Rotate thrust to match image pointing UP
+const thrust = 0.2;
+const friction = 0.99;
+const rotationSpeed = 0.05;
+const thrustOffset = -Math.PI / 2;
 
-// Track key states
-const keysPressed = {
+// Input tracking
+const keys = {
     ArrowLeft: false,
     ArrowRight: false,
     ArrowUp: false,
     ArrowDown: false
 };
 
-// Listen for key presses
-document.addEventListener("keydown", (evt) => {
-    if (evt.key in keysPressed) {
-        keysPressed[evt.key] = true;
-    }
+document.addEventListener("keydown", e => {
+    if (e.key in keys) keys[e.key] = true;
+});
+document.addEventListener("keyup", e => {
+    if (e.key in keys) keys[e.key] = false;
 });
 
-// Listen for key releases
-document.addEventListener("keyup", (evt) => {
-    if (evt.key in keysPressed) {
-        keysPressed[evt.key] = false;
-    }
-});
+// Walls
+let walls = [];
+let score = 0;
+let highScore = 0;
 
-// Main movement function (called every frame)
-function moveShip() {
-    // Rotate the ship
-    if (keysPressed.ArrowLeft) {
-        angle -= rotationSpeed;
-    }
-    if (keysPressed.ArrowRight) {
-        angle += rotationSpeed;
-    }
+// Spawn a wall every 1.5 seconds
+setInterval(() => {
+    spawnWall();
+}, 1500);
 
-    // Thrust forward
-    if (keysPressed.ArrowUp) {
-        velocityX += Math.cos(angle + thrustOffset) * thrustPower;
-        velocityY += Math.sin(angle + thrustOffset) * thrustPower;
+function spawnWall() {
+    const wall = document.createElement("div");
+    wall.classList.add("wall");
+
+    const height = Math.random() * 200 + 50;
+    const y = Math.random() * (600 - height);
+
+    wall.style.width = "40px";
+    wall.style.height = height + "px";
+    wall.style.left = "800px";
+    wall.style.top = y + "px";
+
+    walls.push({ element: wall, x: 800, y, height });
+    gameArea.appendChild(wall);
+}
+
+function movePlayer() {
+    // Rotation
+    if (keys.ArrowLeft) angle -= rotationSpeed;
+    if (keys.ArrowRight) angle += rotationSpeed;
+
+    // Thrust
+    if (keys.ArrowUp) {
+        velX += Math.cos(angle + thrustOffset) * thrust;
+        velY += Math.sin(angle + thrustOffset) * thrust;
     }
 
     // Reverse thrust
-    if (keysPressed.ArrowDown) {
-        velocityX -= Math.cos(angle + thrustOffset) * thrustPower;
-        velocityY -= Math.sin(angle + thrustOffset) * thrustPower;
+    if (keys.ArrowDown) {
+        velX -= Math.cos(angle + thrustOffset) * thrust;
+        velY -= Math.sin(angle + thrustOffset) * thrust;
     }
 
     // Update position
-    posX += velocityX;
-    posY += velocityY;
+    posX += velX;
+    posY += velY;
 
-    // Apply friction (so ship slows down)
-    velocityX *= friction;
-    velocityY *= friction;
+    // Friction
+    velX *= friction;
+    velY *= friction;
 
-    // Move and rotate the image
-    img.style.left = posX + "px";
-    img.style.top = posY + "px";
-    img.style.transform = `rotate(${angle}rad)`;
+    // Keep inside game area
+    posX = Math.max(0, Math.min(740, posX));
+    posY = Math.max(0, Math.min(540, posY));
 
-    // Repeat this function on the next animation frame
-    requestAnimationFrame(moveShip);
+    // Apply to DOM
+    player.style.left = posX + "px";
+    player.style.top = posY + "px";
+    player.style.transform = `rotate(${angle}rad)`;
 }
 
-// Start the animation loop
-moveShip();
+function moveWalls() {
+    for (let i = walls.length - 1; i >= 0; i--) {
+        const w = walls[i];
+        w.x -= 4;
+        w.element.style.left = w.x + "px";
+
+        // Remove off-screen walls
+        if (w.x < -50) {
+            w.element.remove();
+            walls.splice(i, 1);
+        }
+    }
+}
+
+function checkCollision() {
+    for (const w of walls) {
+        const px = posX + 30;
+        const py = posY + 30;
+
+        if (
+            px > w.x &&
+            px < w.x + 40 &&
+            py > w.y &&
+            py < w.y + w.height
+        ) {
+            gameOver();
+        }
+    }
+}
+
+function gameOver() {
+    if (score > highScore) {
+        highScore = score;
+        highScoreDisplay.textContent = highScore;
+
+        // Send high score to ESP8266 OLED
+        fetch(`/oled?text=High:${highScore}`);
+    }
+
+    alert("GAME OVER!");
+    resetGame();
+}
+
+function resetGame() {
+    posX = 400;
+    posY = 300;
+    velX = 0;
+    velY = 0;
+    angle = 0;
+
+    score = 0;
+    scoreDisplay.textContent = score;
+
+    walls.forEach(w => w.element.remove());
+    walls = [];
+}
+
+function gameLoop() {
+    movePlayer();
+    moveWalls();
+    checkCollision();
+
+    score++;
+    scoreDisplay.textContent = score;
+
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
