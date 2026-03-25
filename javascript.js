@@ -14,7 +14,7 @@ let px = 0, py = 0;
 let velX = 0, velY = 0;
 let angle = 0;
 
-const thrust = 0.5;
+const thrust = 1;
 const friction = 0.98;
 const rotationSpeed = 0.08;
 
@@ -46,6 +46,32 @@ let chunks = {};
 function chunkKey(cx, cy) {
     return `${cx},${cy}`;
 }
+
+// === CAMERA UPDATES ===
+function updateCamera() {
+    const offsetX = 400 - px;
+    const offsetY = 300 - py;
+
+    // player is always drawn in the center of the screen
+    playerEl.style.left = "400px";
+    playerEl.style.top  = "300px";
+    playerEl.style.transform = `rotate(${angle}rad)`;
+
+    // enemy is drawn at its world position + camera offset
+    enemyEl.style.left = (ex + offsetX) + "px";
+    enemyEl.style.top  = (ey + offsetY) + "px";
+
+    // move black holes with camera
+    for (const bh of blackHoles) {
+        bh.el.style.left = (bh.x + offsetX) + "px";
+        bh.el.style.top  = (bh.y + offsetY) + "px";
+    }
+
+    // update pointer using same offset
+    updatePointer(offsetX, offsetY);
+}
+
+
 
 // === DETERMINISTIC HASH ===
 function hash2D(x, y) {
