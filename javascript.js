@@ -4,6 +4,7 @@ const ctx = canvas.getContext("2d");
 const scoreboard = document.getElementById("scoreboard");
 const deathMenu = document.getElementById("deathMenu");
 const finalScoreText = document.getElementById("finalScore");
+const mapSizeSelect = document.getElementById("mapSize");
 
 const gridSize = 20;
 
@@ -12,11 +13,19 @@ let directionChanged = false;
 
 highScore = localStorage.getItem("snakeHighScore") || 0;
 
-resetGame();
+mapSizeSelect.addEventListener("change", () => {
+  canvas.width = Number(mapSizeSelect.value);
+  canvas.height = Number(mapSizeSelect.value);
+  respawn();
+});
+
 document.addEventListener("keydown", changeDirection);
 
+resetGame();
+gameLoop();
+
 function resetGame() {
-  snake = [{ x: 200, y: 200 }];
+  snake = [{ x: gridSize * 5, y: gridSize * 5 }];
   dx = gridSize;
   dy = 0;
   food = spawnFood();
@@ -95,15 +104,15 @@ function changeDirection(e) {
   if (directionChanged) return;
   directionChanged = true;
 
-  const key = e.key;
+  const key = e.key.toLowerCase();
 
-  if (key === "ArrowUp" && dy === 0) {
+  if ((key === "arrowup" || key === "w") && dy === 0) {
     dx = 0; dy = -gridSize;
-  } else if (key === "ArrowDown" && dy === 0) {
+  } else if ((key === "arrowdown" || key === "s") && dy === 0) {
     dx = 0; dy = gridSize;
-  } else if (key === "ArrowLeft" && dx === 0) {
+  } else if ((key === "arrowleft" || key === "a") && dx === 0) {
     dx = -gridSize; dy = 0;
-  } else if (key === "ArrowRight" && dx === 0) {
+  } else if ((key === "arrowright" || key === "d") && dx === 0) {
     dx = gridSize; dy = 0;
   }
 }
@@ -122,5 +131,3 @@ function respawn() {
   resetGame();
   gameLoop();
 }
-
-gameLoop();

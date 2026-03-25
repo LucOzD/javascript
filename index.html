@@ -16,9 +16,20 @@
     font-family: Arial, sans-serif;
   }
 
+  #topBar {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+
   #scoreboard {
     font-size: 22px;
-    margin-bottom: 10px;
+  }
+
+  select {
+    padding: 5px;
+    font-size: 16px;
   }
 
   canvas {
@@ -50,7 +61,17 @@
 </head>
 <body>
 
-<div id="scoreboard">Score: 0 | High Score: 0</div>
+<div id="topBar">
+  <div id="scoreboard">Score: 0 | High Score: 0</div>
+
+  <select id="mapSize">
+    <option value="200">Tiny</option>
+    <option value="300">Small</option>
+    <option value="400" selected>Medium</option>
+    <option value="500">Large</option>
+    <option value="600">Massive</option>
+  </select>
+</div>
 
 <canvas id="game" width="400" height="400"></canvas>
 
