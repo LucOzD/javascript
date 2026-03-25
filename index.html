@@ -1,90 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Infinite Chase</title>
-    <style>
-        body {
-            background: #111;
-            color: rgb(179, 141, 25);
-            font-family: monospace;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-        }
-
-        #gameArea {
-            position: relative;
-            width: 800px;
-            height: 600px;
-            background: #222;
-            margin: 20px auto;
-            overflow: hidden;
-            border: 3px solid #0f0;
-        }
-
-        #player, #enemy {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-        }
-
-        #pointer {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            display: none;
-        }
-         #background {
-          position: absolute;
-          width: 2000px;
-         height: 2000px;
-           left: -600px;
-          top: -700px;
-     
-          background-repeat: repeat;
-            opacity: 0.25; /* optional, looks nice */
-          pointer-events: none;
-        }
-.chunk {
-    position: absolute;
-    z-index: 0 !important;
-    opacity: 1 !important;
-}
-#player, #enemy, #pointer {
-    position: absolute;
-    z-index: 1000 !important;
-}
-
-.wall {
-    background: #444;
-    border: 2px solid #888;
-    position: absolute;
-    z-index: 500;
-}
-
-.blackHole {
-    position: absolute;
-    z-index: 900;
-}
-
-    </style>
+<meta charset="UTF-8">
+<title>Simple Snake Game</title>
+<style>
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #222;
+    margin: 0;
+  }
+  canvas {
+    background: #111;
+    border: 2px solid #0f0;
+  }
+</style>
 </head>
 <body>
 
-<h1>e</h1>
-<p>wasd</p>
-<p>Score: <span id="score">0</span></p>
-<p>High Score: <span id="highScore">0</span></p>
-
-<div id="gameArea">
-  <div id="background"></div>
-
-    <img id="player" src="me.webp">
-    <img id="enemy" src="cris.webp">
-    <img id="pointer" src="zac.webp">
-</div>
+<canvas id="game" width="400" height="400"></canvas>
 
 <script src="javascript.js"></script>
-
 </body>
 </html>
