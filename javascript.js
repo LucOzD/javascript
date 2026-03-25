@@ -172,20 +172,15 @@ function applyBlackHoles() {
         const dy = bh.y - py;
         const dist = Math.hypot(dx, dy);
 
-        if (dist < 1) continue; // avoid NaN
+        if (dist < 1) continue;
 
-        // Only pull inside radius
         if (dist < bh.radius) {
-            // stronger when closer, but never infinite
-            const t = 1 - dist / bh.radius;      // 0 at edge, 1 at center
-            const pull = bh.strength * t;        // scale by strength
+            const t = 1 - dist / bh.radius;
+            const pull = bh.strength * t;
 
             velX += (dx / dist) * pull;
             velY += (dy / dist) * pull;
         }
-
-        // ❌ no more velocity override / slingshot
-        // we just let gravity add on top of your own movement
     }
 }
 
@@ -465,6 +460,7 @@ function loop() {
     updatePointer(400 - px, 300 - py);
     updateDynamicWalls();
     checkCollision();
+    updateCamera();     
     
 
     score++;
