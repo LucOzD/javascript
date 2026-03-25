@@ -14,13 +14,13 @@ let px = 0, py = 0;
 let velX = 0, velY = 0;
 let angle = 0;
 
-const thrust = 1;
+const thrust = 0.5;
 const friction = 0.98;
 const rotationSpeed = 0.08;
 
 // === ENEMY ===
 let ex = 0, ey = 0;
-let enemySpeed = 10;
+let enemySpeed = 2;
 
 // === INPUT ===
 const keys = { w: false, a: false, s: false, d: false };
@@ -172,18 +172,23 @@ function applyBlackHoles() {
         const dy = bh.y - py;
         const dist = Math.hypot(dx, dy);
 
-        if (dist < bh.radius && dist > 1) {
-            const pull = bh.strength * (1 - dist / bh.radius);
+        if (dist < 1) continue; // avoid NaN
+
+        // Only pull inside radius
+        if (dist < bh.radius) {
+            // stronger when closer, but never infinite
+            const t = 1 - dist / bh.radius;      // 0 at edge, 1 at center
+            const pull = bh.strength * t;        // scale by strength
+
             velX += (dx / dist) * pull;
             velY += (dy / dist) * pull;
         }
 
-        if (dist < bh.core && dist > 1) {
-            velX = -(dx / dist) * 25;
-            velY = -(dy / dist) * 25;
-        }
+        // ❌ no more velocity override / slingshot
+        // we just let gravity add on top of your own movement
     }
 }
+
 
 // === CREATE CHUNK ===
 function createChunk(cx, cy) {
