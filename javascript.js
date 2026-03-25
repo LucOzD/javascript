@@ -1,31 +1,42 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+const scoreboard = document.getElementById("scoreboard");
+const deathMenu = document.getElementById("deathMenu");
+const finalScoreText = document.getElementById("finalScore");
+
 const gridSize = 20;
-let snake = [{ x: 200, y: 200 }];
-let dx = gridSize;
-let dy = 0;
-let food = spawnFood();
-let gameOver = false;
 
-let score = 0;
-let highScore = localStorage.getItem("snakeHighScore") || 0;
-
+let snake, dx, dy, food, gameOver, score, highScore;
 let directionChanged = false;
 
+highScore = localStorage.getItem("snakeHighScore") || 0;
+
+resetGame();
 document.addEventListener("keydown", changeDirection);
+
+function resetGame() {
+  snake = [{ x: 200, y: 200 }];
+  dx = gridSize;
+  dy = 0;
+  food = spawnFood();
+  gameOver = false;
+  score = 0;
+  updateScoreboard();
+  deathMenu.style.display = "none";
+}
 
 function gameLoop() {
   if (gameOver) return;
 
-  directionChanged = false; // allow one direction change per frame
+  directionChanged = false;
 
   setTimeout(() => {
     clearBoard();
     moveSnake();
     drawFood();
     drawSnake();
-    drawScore();
+    updateScoreboard();
     gameLoop();
   }, 100);
 }
@@ -43,7 +54,6 @@ function drawSnake() {
 function moveSnake() {
   const head = { x: snake[0].x + dx, y: snake[0].y + dy };
 
-  // Wall collision
   if (
     head.x < 0 || head.x >= canvas.width ||
     head.y < 0 || head.y >= canvas.height
@@ -51,14 +61,12 @@ function moveSnake() {
     return endGame();
   }
 
-  // Self collision
   if (snake.some(part => part.x === head.x && part.y === head.y)) {
     return endGame();
   }
 
   snake.unshift(head);
 
-  // Food collision
   if (head.x === food.x && head.y === food.y) {
     score++;
     if (score > highScore) {
@@ -84,7 +92,7 @@ function spawnFood() {
 }
 
 function changeDirection(e) {
-  if (directionChanged) return; // prevent double input in same frame
+  if (directionChanged) return;
   directionChanged = true;
 
   const key = e.key;
@@ -100,16 +108,19 @@ function changeDirection(e) {
   }
 }
 
-function drawScore() {
-  ctx.fillStyle = "#0f0";
-  ctx.font = "18px Arial";
-  ctx.fillText("Score: " + score, 10, 20);
-  ctx.fillText("High Score: " + highScore, 10, 40);
+function updateScoreboard() {
+  scoreboard.textContent = `Score: ${score} | High Score: ${highScore}`;
 }
 
 function endGame() {
   gameOver = true;
-  alert("Game Over! Your score: " + score);
+  finalScoreText.textContent = `Final Score: ${score}`;
+  deathMenu.style.display = "block";
+}
+
+function respawn() {
+  resetGame();
+  gameLoop();
 }
 
 gameLoop();
