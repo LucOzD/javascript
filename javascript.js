@@ -8,16 +8,24 @@ let dy = 0;
 let food = spawnFood();
 let gameOver = false;
 
+let score = 0;
+let highScore = localStorage.getItem("snakeHighScore") || 0;
+
+let directionChanged = false;
+
 document.addEventListener("keydown", changeDirection);
 
 function gameLoop() {
   if (gameOver) return;
+
+  directionChanged = false; // allow one direction change per frame
 
   setTimeout(() => {
     clearBoard();
     moveSnake();
     drawFood();
     drawSnake();
+    drawScore();
     gameLoop();
   }, 100);
 }
@@ -52,6 +60,11 @@ function moveSnake() {
 
   // Food collision
   if (head.x === food.x && head.y === food.y) {
+    score++;
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem("snakeHighScore", highScore);
+    }
     food = spawnFood();
   } else {
     snake.pop();
@@ -71,6 +84,9 @@ function spawnFood() {
 }
 
 function changeDirection(e) {
+  if (directionChanged) return; // prevent double input in same frame
+  directionChanged = true;
+
   const key = e.key;
 
   if (key === "ArrowUp" && dy === 0) {
@@ -84,9 +100,16 @@ function changeDirection(e) {
   }
 }
 
+function drawScore() {
+  ctx.fillStyle = "#0f0";
+  ctx.font = "18px Arial";
+  ctx.fillText("Score: " + score, 10, 20);
+  ctx.fillText("High Score: " + highScore, 10, 40);
+}
+
 function endGame() {
   gameOver = true;
-  alert("Game Over!");
+  alert("Game Over! Your score: " + score);
 }
 
 gameLoop();
