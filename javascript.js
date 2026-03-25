@@ -4,20 +4,28 @@ const ctx = canvas.getContext("2d");
 const scoreboard = document.getElementById("scoreboard");
 const deathMenu = document.getElementById("deathMenu");
 const finalScoreText = document.getElementById("finalScore");
-const mapSizeSelect = document.getElementById("mapSize");
+
+const sizeButtons = document.querySelectorAll(".sizeOption");
 
 const gridSize = 20;
 
 let snake, dx, dy, food, gameOver, score, highScore;
 let directionChanged = false;
 
+let selectedSize = 400; // default
+
 highScore = localStorage.getItem("snakeHighScore") || 0;
 
-mapSizeSelect.addEventListener("change", () => {
-  canvas.width = Number(mapSizeSelect.value);
-  canvas.height = Number(mapSizeSelect.value);
-  respawn();
+sizeButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    sizeButtons.forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    selectedSize = Number(btn.dataset.size);
+  });
 });
+
+// Pre-select Medium
+document.querySelector('[data-size="400"]').classList.add("selected");
 
 document.addEventListener("keydown", changeDirection);
 
@@ -25,6 +33,9 @@ resetGame();
 gameLoop();
 
 function resetGame() {
+  canvas.width = selectedSize;
+  canvas.height = selectedSize;
+
   snake = [{ x: gridSize * 5, y: gridSize * 5 }];
   dx = gridSize;
   dy = 0;

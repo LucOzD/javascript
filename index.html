@@ -56,6 +56,33 @@
     border: none;
     cursor: pointer;
     font-size: 18px;
+
+    #sizeSelector {
+  display: flex;
+  overflow-x: auto;
+  gap: 15px;
+  padding: 10px;
+  margin: 10px 0;
+  scrollbar-width: none;
+}
+
+#sizeSelector::-webkit-scrollbar {
+  display: none;
+}
+
+.sizeOption {
+  padding: 10px 20px;
+  border: 2px solid #0f0;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 18px;
+}
+
+.sizeOption.selected {
+  background: #0f0;
+  color: #111;
+}
+
   }
 </style>
 </head>
@@ -78,6 +105,15 @@
 <div id="deathMenu">
   <h2>You Died!</h2>
   <p id="finalScore"></p>
+
+  <div id="sizeSelector">
+    <div class="sizeOption" data-size="200">Tiny</div>
+    <div class="sizeOption" data-size="300">Small</div>
+    <div class="sizeOption" data-size="400">Medium</div>
+    <div class="sizeOption" data-size="500">Large</div>
+    <div class="sizeOption" data-size="600">Massive</div>
+  </div>
+
   <button onclick="respawn()">Respawn</button>
 </div>
 
