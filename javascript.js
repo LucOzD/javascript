@@ -104,6 +104,7 @@ function generateWalls(chunk, cx, cy) {
     }
 }
 
+
 // === DYNAMIC WALL DRIFT ===
 function updateDynamicWalls() {
     for (const key in chunks) {
@@ -127,15 +128,15 @@ function updateDynamicWalls() {
 const blackHoles = [];
 
 function trySpawnBlackHole(cx, cy, chunkElement) {
-    const chance = hash2D(cx * 99, cy * 77);
-
-    if (chance < 0.6) return; // ~1 hole per 2.5 chunks
-
+    // deterministic random position inside chunk
     const r1 = hash2D(cx * 13, cy * 17);
     const r2 = hash2D(cx * 19, cy * 23);
 
-    const x = r1 * CHUNK_SIZE;
-    const y = r2 * CHUNK_SIZE;
+    const localX = r1 * CHUNK_SIZE;
+    const localY = r2 * CHUNK_SIZE;
+
+    const worldX = cx * CHUNK_SIZE + localX;
+    const worldY = cy * CHUNK_SIZE + localY;
 
     const radius = 450;
     const core = 120;
@@ -155,14 +156,15 @@ function trySpawnBlackHole(cx, cy, chunkElement) {
     chunkElement.appendChild(el);
 
     blackHoles.push({
-        x: cx * CHUNK_SIZE + x,
-        y: cy * CHUNK_SIZE + y,
+        x: worldX,
+        y: worldY,
         radius,
         core,
         strength,
         el
     });
 }
+
 
 function applyBlackHoles() {
     for (const bh of blackHoles) {
@@ -207,8 +209,9 @@ function createChunk(cx, cy) {
         }
     }
 
-    generateWalls(chunk, cx, cy);
-    trySpawnBlackHole(cx, cy, chunk);
+      generateWalls(chunk, cx, cy);
+      trySpawnBlackHole(cx, cy, chunk);
+
 
     const firstElement = [...gameArea.childNodes].find(n => n.nodeType === 1);
     if (firstElement) gameArea.insertBefore(chunk, firstElement);
@@ -321,6 +324,7 @@ function handleWallCollision() {
             const ww = parseFloat(wall.style.width);
             const wh = parseFloat(wall.style.height);
 
+            // AABB collision
             if (
                 px + half > wx &&
                 px - half < wx + ww &&
@@ -334,25 +338,26 @@ function handleWallCollision() {
     }
 }
 
+
 function resolveCollision(wx, wy, ww, wh, half) {
-    const left   = (px + half) - wx;
-    const right  = (wx + ww) - (px - half);
-    const top    = (py + half) - wy;
-    const bottom = (wy + wh) - (py - half);
+    const overlapLeft   = (px + half) - wx;
+    const overlapRight  = (wx + ww) - (px - half);
+    const overlapTop    = (py + half) - wy;
+    const overlapBottom = (wy + wh) - (py - half);
 
-    const minPen = Math.min(left, right, top, bottom);
+    const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
 
-    if (minPen === left) {
+    if (minOverlap === overlapLeft) {
         px = wx - half;
-    } else if (minPen === right) {
+    } else if (minOverlap === overlapRight) {
         px = wx + ww + half;
-    } else if (minPen === top) {
+    } else if (minOverlap === overlapTop) {
         py = wy - half;
-    } else if (minPen === bottom) {
+    } else {
         py = wy + wh + half;
     }
 
-    // Push dynamic wall
+    // push wall
     if (currentWall) {
         const pushX = (px - (wx + ww / 2)) * 0.3;
         const pushY = (py - (wy + wh / 2)) * 0.3;
@@ -366,6 +371,7 @@ function resolveCollision(wx, wy, ww, wh, half) {
     velX = 0;
     velY = 0;
 }
+
 
 // === ENEMY AI ===
 function moveEnemy() {
@@ -454,6 +460,7 @@ function loop() {
     updatePointer(400 - px, 300 - py);
     updateDynamicWalls();
     checkCollision();
+    
 
     score++;
     scoreEl.textContent = score;
