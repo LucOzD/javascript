@@ -117,3 +117,50 @@ input {
   margin: 8px;
   cursor: pointer;
 }
+
+/* ===== CELL REVEAL POP ===== */
+.cell.revealed {
+  animation: revealPop 0.15s ease-out forwards;
+}
+
+@keyframes revealPop {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== EXPLOSION ===== */
+.cell.mine {
+  animation: explode 0.3s ease-out;
+}
+
+@keyframes explode {
+  0% { transform: scale(1); background: #b00; }
+  50% { transform: scale(1.4); background: #f33; }
+  100% { transform: scale(1); background: #900; }
+}
+
+/* ===== FLAG DROP ===== */
+.cell.flagged {
+  animation: flagDrop 0.2s ease-out;
+}
+
+@keyframes flagDrop {
+  0% { transform: translateY(-10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* ===== MENU FADE ===== */
+.menu {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.menu.show {
+  opacity: 1;
+}
+
+/* ===== HOVER GLOW ===== */
+.cell:not(.revealed):hover {
+  background: #555;
+  box-shadow: 0 0 6px #888;
+}

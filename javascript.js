@@ -16,14 +16,15 @@ let firstClick = true;
 
 // ===== PRESET SIZES =====
 const sizes = {
-  small:  { rows: 10, cols: 15, mines: 25 },
-  medium: { rows: 20, cols: 30, mines: 50 },
-  large:  { rows: 25, cols: 50, mines: 200 }
+  small:  { rows: 10, cols: 10, mines: 15 },
+  medium: { rows: 25, cols: 25, mines: 80 },
+  large:  { rows: 45, cols: 45, mines: 250 }
 };
 
 // ===== MENU CONTROL =====
 function showMenu(message = "") {
   menuMessage.textContent = message;
+  menu.classList.add("show");
   menu.style.display = "flex";
 }
 
@@ -50,7 +51,9 @@ function startNewGame(sizeKey) {
   createEmptyBoard();
   buildBoardDOM();
 
-  menu.style.display = "none";
+  // Fade out menu
+  menu.classList.remove("show");
+  setTimeout(() => menu.style.display = "none", 300);
 }
 
 // ===== BOARD CREATION =====
@@ -155,7 +158,7 @@ function revealCell(cell) {
 
   const el = cell.element;
   el.classList.add('revealed');
-  el.textContent = '';
+  el.style.animationDelay = `${Math.random() * 0.05}s`; // small stagger
 
   if (cell.mine) {
     el.classList.add('mine');
@@ -196,7 +199,9 @@ function floodReveal(r, c) {
 
       const el = neighbor.element;
       el.classList.add('revealed');
-      el.textContent = '';
+
+      // Wave effect
+      el.style.animationDelay = `${(nr + nc) * 0.01}s`;
 
       if (neighbor.adjacent > 0) {
         el.textContent = neighbor.adjacent;
@@ -270,4 +275,10 @@ function onCellRightClick(e) {
 
   cell.flagged = !cell.flagged;
   cell.element.textContent = cell.flagged ? '🚩' : '';
+
+  if (cell.flagged) {
+    cell.element.classList.add("flagged");
+  } else {
+    cell.element.classList.remove("flagged");
+  }
 }
