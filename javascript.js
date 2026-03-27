@@ -6,6 +6,12 @@ const sizeButtons = document.querySelectorAll('.sizeBtn');
 // ===== GAME ELEMENTS =====
 const boardElement = document.getElementById('board');
 const statusElement = document.getElementById('status');
+const mineCounterElement = document.getElementById('mineCounter');
+const timerElement = document.getElementById('timer');
+
+// ===== TIMER STATE =====
+let timer = 0;
+let timerInterval = null;
 
 // ===== GAME STATE =====
 let rows, cols, mines;
@@ -38,9 +44,6 @@ sizeButtons.forEach(btn => {
 // ===== GAME SETUP =====
 function startNewGame(sizeKey) {
   const s = sizes[sizeKey];
-  menu.classList.remove("show");
-setTimeout(() => menu.style.display = "none", 300);
-
 
   rows = s.rows;
   cols = s.cols;
@@ -51,12 +54,22 @@ setTimeout(() => menu.style.display = "none", 300);
   cellsRevealed = 0;
   statusElement.textContent = '';
 
+  // reset timer + HUD
+  clearInterval(timerInterval);
+  timer = 0;
+  if (timerElement) {
+    timerElement.textContent = "Time: 0";
+  }
+  if (mineCounterElement) {
+    mineCounterElement.textContent = `Mines: ${mines}`;
+  }
+
   createEmptyBoard();
   buildBoardDOM();
 
-  // Fade out menu
+  // hide menu
   menu.classList.remove("show");
-  setTimeout(() => menu.style.display = "none", 300);
+  menu.style.display = "none";
 }
 
 // ===== BOARD CREATION =====
@@ -203,7 +216,7 @@ function floodReveal(r, c) {
       const el = neighbor.element;
       el.classList.add('revealed');
 
-      // Wave effect
+      // Wave effect on reveal
       el.style.animationDelay = `${(nr + nc) * 0.01}s`;
 
       if (neighbor.adjacent > 0) {
@@ -212,6 +225,20 @@ function floodReveal(r, c) {
       } else {
         queue.push([nr, nc]);
       }
+    }
+  }
+}
+
+// ===== WIN ANIMATION =====
+function playWinAnimation() {
+  let delay = 0;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cellEl = board[r][c].element;
+      setTimeout(() => {
+        cellEl.classList.add('win-animate');
+      }, delay);
+      delay += 10; // wave speed
     }
   }
 }
@@ -235,6 +262,8 @@ function checkWin() {
 
   if (cellsRevealed === nonMineCells && !gameOver) {
     gameOver = true;
+    clearInterval(timerInterval);
+    playWinAnimation();
     showMenu("🎉 You win!");
   }
 }
@@ -251,6 +280,14 @@ function onCellLeftClick(e) {
     placeMines(r, c);
     calculateAdjacents();
     firstClick = false;
+
+    // start timer on first click
+    timerInterval = setInterval(() => {
+      timer++;
+      if (timerElement) {
+        timerElement.textContent = `Time: ${timer}`;
+      }
+    }, 1000);
   }
 
   if (cell.flagged) return;
@@ -259,6 +296,7 @@ function onCellLeftClick(e) {
 
   if (cell.mine) {
     gameOver = true;
+    clearInterval(timerInterval);
     revealAllMines();
     showMenu("💥 You hit a mine! Try again.");
   } else {
@@ -283,5 +321,11 @@ function onCellRightClick(e) {
     cell.element.classList.add("flagged");
   } else {
     cell.element.classList.remove("flagged");
+  }
+
+  // update mine counter
+  if (mineCounterElement) {
+    const flaggedCount = board.flat().filter(c => c.flagged).length;
+    mineCounterElement.textContent = `Mines: ${mines - flaggedCount}`;
   }
 }

@@ -157,3 +157,10 @@ input {
   background: #555;
   box-shadow: 0 0 6px #888;
 }
+
+#hud {
+  margin-top: 10px;
+  display: flex;
+  gap: 20px;
+  font-size: 20px;
+}
