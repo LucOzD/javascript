@@ -1,122 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Snake Game</title>
-<style>
-  body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #222;
-    margin: 0;
-    height: 100vh;
-    justify-content: center;
-    color: #0f0;
-    font-family: Arial, sans-serif;
-  }
-
-  #topBar {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 10px;
-    align-items: center;
-  }
-
-  #scoreboard {
-    font-size: 22px;
-  }
-
-  select {
-    padding: 5px;
-    font-size: 16px;
-  }
-
-  canvas {
-    background: #111;
-    border: 2px solid #0f0;
-  }
-
-  #deathMenu {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(20, 20, 20, 0.95);
-    border: 2px solid #0f0;
-    padding: 20px 40px;
-    text-align: center;
-    display: none;
-  }
-
-  #deathMenu button {
-    margin-top: 15px;
-    padding: 10px 20px;
-    background: #0f0;
-    border: none;
-    cursor: pointer;
-    font-size: 18px;
-
-    #sizeSelector {
-  display: flex;
-  overflow-x: auto;
-  gap: 15px;
-  padding: 10px;
-  margin: 10px 0;
-  scrollbar-width: none;
-}
-
-#sizeSelector::-webkit-scrollbar {
-  display: none;
-}
-
-.sizeOption {
-  padding: 10px 20px;
-  border: 2px solid #0f0;
-  cursor: pointer;
-  white-space: nowrap;
-  font-size: 18px;
-}
-
-.sizeOption.selected {
-  background: #0f0;
-  color: #111;
-}
-
-  }
-</style>
+  <meta charset="UTF-8" />
+  <title>Minesweeper</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <h1>Minesweeper</h1>
 
-<div id="topBar">
-  <div id="scoreboard">Score: 0 | High Score: 0</div>
-
-  <select id="mapSize">
-    <option value="200">Tiny</option>
-    <option value="300">Small</option>
-    <option value="400" selected>Medium</option>
-    <option value="500">Large</option>
-    <option value="600">Massive</option>
-  </select>
-</div>
-
-<canvas id="game" width="400" height="400"></canvas>
-
-<div id="deathMenu">
-  <h2>You Died!</h2>
-  <p id="finalScore"></p>
-
-  <div id="sizeSelector">
-    <div class="sizeOption" data-size="200">Tiny</div>
-    <div class="sizeOption" data-size="300">Small</div>
-    <div class="sizeOption" data-size="400">Medium</div>
-    <div class="sizeOption" data-size="500">Large</div>
-    <div class="sizeOption" data-size="600">Massive</div>
+  <div id="controls">
+    <label>Rows: <input type="number" id="rows" value="10" min="5" max="30"></label>
+    <label>Cols: <input type="number" id="cols" value="10" min="5" max="30"></label>
+    <label>Mines: <input type="number" id="mines" value="15" min="1" max="400"></label>
+    <button id="newGame">New Game</button>
   </div>
 
-  <button onclick="respawn()">Respawn</button>
-</div>
+  <div id="board"></div>
+  <div id="status"></div>
 
-<script src="javascript.js"></script>
+  <script src="javascript.js"></script>
 </body>
 </html>

@@ -1,0 +1,77 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #222;
+  color: #eee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+#controls {
+  margin-bottom: 10px;
+}
+
+#board {
+  display: grid;
+  border: 2px solid #555;
+  background: #333;
+  user-select: none;
+}
+
+.cell {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  background: #444;
+  color: #eee;
+}
+
+.cell.revealed {
+  background: #222;
+  cursor: default;
+}
+
+.cell.mine {
+  background: #b00;
+}
+
+.cell.flagged {
+  background: #444;
+  color: #ff0;
+}
+
+.cell.revealed.num-1 { color: #00f; }
+.cell.revealed.num-2 { color: #0a0; }
+.cell.revealed.num-3 { color: #f00; }
+.cell.revealed.num-4 { color: #00a; }
+.cell.revealed.num-5 { color: #800; }
+.cell.revealed.num-6 { color: #088; }
+.cell.revealed.num-7 { color: #000; }
+.cell.revealed.num-8 { color: #888; }
+
+#status {
+  margin-top: 10px;
+  min-height: 20px;
+}
+
+button {
+  padding: 5px 10px;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+input {
+  width: 50px;
+  margin: 0 3px;
+  text-align: center;
+}
