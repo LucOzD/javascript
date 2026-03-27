@@ -16,9 +16,9 @@ let firstClick = true;
 
 // ===== PRESET SIZES =====
 const sizes = {
-  small:  { rows: 10, cols: 10, mines: 15 },
-  medium: { rows: 25, cols: 25, mines: 80 },
-  large:  { rows: 45, cols: 45, mines: 250 }
+  small:  { rows: 10, cols: 10, mines: 25 },
+  medium: { rows: 20, cols: 20, mines: 50 },
+  large:  { rows: 30, cols: 30, mines: 225 }
 };
 
 // ===== MENU CONTROL =====
