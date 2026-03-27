@@ -38,6 +38,9 @@ sizeButtons.forEach(btn => {
 // ===== GAME SETUP =====
 function startNewGame(sizeKey) {
   const s = sizes[sizeKey];
+  menu.classList.remove("show");
+setTimeout(() => menu.style.display = "none", 300);
+
 
   rows = s.rows;
   cols = s.cols;
