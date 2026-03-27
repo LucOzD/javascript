@@ -110,3 +110,10 @@ input {
   font-size: 20px;
   color: #ff0;
 }
+
+.sizeBtn {
+  padding: 12px 25px;
+  font-size: 18px;
+  margin: 8px;
+  cursor: pointer;
+}
