@@ -4,11 +4,18 @@ const rowsInput = document.getElementById('rows');
 const colsInput = document.getElementById('cols');
 const minesInput = document.getElementById('mines');
 const newGameButton = document.getElementById('newGame');
+const menu = document.getElementById('menu');
+const startGameButton = document.getElementById('startGame');
+const menuMessage = document.getElementById('menuMessage');
+
 
 let rows, cols, mines;
 let board = [];
 let gameOver = false;
 let cellsRevealed = 0;
+
+startGameButton.addEventListener('click', startNewGame);
+
 
 function createEmptyBoard() {
   board = [];
@@ -31,16 +38,30 @@ function createEmptyBoard() {
 
 function placeMines(firstClickRow, firstClickCol) {
   let placed = 0;
+
+  // All 8 neighbors + the clicked cell
+  const safeZone = [];
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      safeZone.push(`${firstClickRow + dr},${firstClickCol + dc}`);
+    }
+  }
+
   while (placed < mines) {
     const r = Math.floor(Math.random() * rows);
     const c = Math.floor(Math.random() * cols);
 
-    if ((r === firstClickRow && c === firstClickCol) || board[r][c].mine) continue;
+    // Skip if already a mine
+    if (board[r][c].mine) continue;
+
+    // Skip if inside the 3×3 safe zone
+    if (safeZone.includes(`${r},${c}`)) continue;
 
     board[r][c].mine = true;
     placed++;
   }
 }
+
 
 function inBounds(r, c) {
   return r >= 0 && r < rows && c >= 0 && c < cols;
@@ -97,17 +118,26 @@ function startNewGame() {
   cols = parseInt(colsInput.value, 10);
   mines = parseInt(minesInput.value, 10);
 
-  const maxMines = rows * cols - 1;
+  const maxMines = rows * cols - 9; // allow 3x3 safe zone
   if (mines > maxMines) mines = maxMines;
   minesInput.value = mines;
 
   gameOver = false;
   cellsRevealed = 0;
-  statusElement.textContent = 'Left-click to reveal, right-click to flag.';
+  statusElement.textContent = '';
 
   createEmptyBoard();
   buildBoardDOM();
+
+  // Hide menu
+  menu.style.display = "none";
 }
+
+function showMenu(message = "") {
+  menuMessage.textContent = message;
+  menu.style.display = "flex";
+}
+
 
 function revealCell(cell) {
   if (cell.revealed || cell.flagged) return;
@@ -184,7 +214,8 @@ function checkWin() {
   const nonMineCells = totalCells - mines;
   if (cellsRevealed === nonMineCells && !gameOver) {
     gameOver = true;
-    statusElement.textContent = 'You win! 🎉 Click "New Game" to play again.';
+    showMenu("🎉 You win!");
+
   }
 }
 
@@ -208,7 +239,7 @@ function onCellLeftClick(e) {
   if (cell.mine) {
     gameOver = true;
     revealAllMines();
-    statusElement.textContent = 'Game over! 💥 Click "New Game" to try again.';
+    showMenu("💥 You hit a mine! Try again.");
   } else {
     checkWin();
   }

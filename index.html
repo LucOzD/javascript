@@ -6,13 +6,17 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Minesweeper</h1>
+  <div id="menu" class="menu">
+    <h1>Minesweeper</h1>
 
-  <div id="controls">
-    <label>Rows: <input type="number" id="rows" value="10" min="5" max="30"></label>
-    <label>Cols: <input type="number" id="cols" value="10" min="5" max="30"></label>
-    <label>Mines: <input type="number" id="mines" value="15" min="1" max="400"></label>
-    <button id="newGame">New Game</button>
+    <div class="menu-section">
+      <label>Rows: <input type="number" id="rows" value="10" min="5" max="30"></label>
+      <label>Cols: <input type="number" id="cols" value="10" min="5" max="30"></label>
+      <label>Mines: <input type="number" id="mines" value="15" min="1" max="400"></label>
+    </div>
+
+    <button id="startGame">Start Game</button>
+    <div id="menuMessage"></div>
   </div>
 
   <div id="board"></div>
@@ -20,4 +24,5 @@
 
   <script src="javascript.js"></script>
 </body>
+
 </html>
