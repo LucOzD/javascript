@@ -190,10 +190,23 @@ input {
 #leaderboards {
   margin-top: 20px;
   text-align: center;
+  width: 260px;
 }
 
 .lb-section {
-  margin: 10px 0;
+  margin: 12px 0;
+  background: #111;
+  padding: 10px;
+  border: 1px solid #444;
+  border-radius: 6px;
+  max-height: 120px;     /* makes it scrollable */
+  overflow-y: auto;
+}
+
+.lb-section h3 {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  color: #ddd;
 }
 
 .lb-section ul {
@@ -204,5 +217,11 @@ input {
 
 .lb-section li {
   padding: 4px 0;
-  font-size: 16px;
+  font-size: 15px;
+  border-bottom: 1px solid #333;
 }
+
+.lb-section li:last-child {
+  border-bottom: none;
+}
+

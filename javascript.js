@@ -57,12 +57,17 @@ function saveScore(size, name, time) {
   const list = JSON.parse(localStorage.getItem(key) || "[]");
 
   list.push({ name, time });
+
+  // Sort by fastest time
   list.sort((a, b) => a.time - b.time);
-  list.splice(5); // keep top 5
+
+  // Keep only top 5
+  list.splice(5);
 
   localStorage.setItem(key, JSON.stringify(list));
   updateLB(size);
 }
+
 
 // ===== MENU CONTROL =====
 function showMenu(message = "") {
@@ -71,6 +76,7 @@ function showMenu(message = "") {
   menu.style.display = "flex";
   loadLeaderboards();
 }
+
 
 sizeButtons.forEach(btn => {
   btn.addEventListener('click', () => {
