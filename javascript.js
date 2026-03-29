@@ -243,6 +243,45 @@ function playWinAnimation() {
   }
 }
 
+function playLoseAnimation(callback) {
+  let delay = 0;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = board[r][c];
+      if (cell.mine) {
+        setTimeout(() => {
+          cell.element.classList.add("mine-explode");
+          cell.element.textContent = "💥";
+        }, delay);
+        delay += 80; // explosion wave speed
+      }
+    }
+  }
+
+  // After all explosions finish, call callback (show menu)
+  setTimeout(callback, delay + 300);
+}
+
+function playWinAnimation(callback) {
+  let delay = 0;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cellEl = board[r][c].element;
+
+      setTimeout(() => {
+        cellEl.classList.add("win-ripple");
+      }, delay);
+
+      delay += 10; // ripple speed
+    }
+  }
+
+  setTimeout(callback, delay + 300);
+}
+
+
 // ===== GAME END =====
 function revealAllMines() {
   for (let r = 0; r < rows; r++) {
@@ -260,12 +299,15 @@ function checkWin() {
   const totalCells = rows * cols;
   const nonMineCells = totalCells - mines;
 
-  if (cellsRevealed === nonMineCells && !gameOver) {
-    gameOver = true;
-    clearInterval(timerInterval);
-    playWinAnimation();
+ if (cellsRevealed === nonMineCells && !gameOver) {
+  gameOver = true;
+  clearInterval(timerInterval);
+
+  playWinAnimation(() => {
     showMenu("🎉 You win!");
-  }
+  });
+}
+
 }
 
 // ===== CLICK HANDLERS =====
@@ -295,11 +337,16 @@ function onCellLeftClick(e) {
   revealCell(cell);
 
   if (cell.mine) {
-    gameOver = true;
-    clearInterval(timerInterval);
-    revealAllMines();
+  gameOver = true;
+  clearInterval(timerInterval);
+
+  playLoseAnimation(() => {
     showMenu("💥 You hit a mine! Try again.");
-  } else {
+  });
+
+  return;
+}
+ else {
     checkWin();
   }
 }
