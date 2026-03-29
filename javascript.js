@@ -9,6 +9,11 @@ const statusElement = document.getElementById('status');
 const mineCounterElement = document.getElementById('mineCounter');
 const timerElement = document.getElementById('timer');
 
+// ===== LEADERBOARD ELEMENTS =====
+const lbSmall = document.getElementById("lb-small");
+const lbMedium = document.getElementById("lb-medium");
+const lbLarge = document.getElementById("lb-large");
+
 // ===== TIMER STATE =====
 let timer = 0;
 let timerInterval = null;
@@ -19,6 +24,7 @@ let board = [];
 let gameOver = false;
 let cellsRevealed = 0;
 let firstClick = true;
+let currentSize = "small";
 
 // ===== PRESET SIZES =====
 const sizes = {
@@ -27,11 +33,43 @@ const sizes = {
   large:  { rows: 45, cols: 45, mines: 250 }
 };
 
+// ===== LEADERBOARD STORAGE =====
+function loadLeaderboards() {
+  updateLB("small");
+  updateLB("medium");
+  updateLB("large");
+}
+
+function updateLB(size) {
+  const list = JSON.parse(localStorage.getItem("lb-" + size) || "[]");
+  const ul = size === "small" ? lbSmall : size === "medium" ? lbMedium : lbLarge;
+
+  ul.innerHTML = "";
+  list.forEach(entry => {
+    const li = document.createElement("li");
+    li.textContent = `${entry.name} - ${entry.time}s`;
+    ul.appendChild(li);
+  });
+}
+
+function saveScore(size, name, time) {
+  const key = "lb-" + size;
+  const list = JSON.parse(localStorage.getItem(key) || "[]");
+
+  list.push({ name, time });
+  list.sort((a, b) => a.time - b.time);
+  list.splice(5); // keep top 5
+
+  localStorage.setItem(key, JSON.stringify(list));
+  updateLB(size);
+}
+
 // ===== MENU CONTROL =====
 function showMenu(message = "") {
   menuMessage.textContent = message;
   menu.classList.add("show");
   menu.style.display = "flex";
+  loadLeaderboards();
 }
 
 sizeButtons.forEach(btn => {
@@ -43,6 +81,7 @@ sizeButtons.forEach(btn => {
 
 // ===== GAME SETUP =====
 function startNewGame(sizeKey) {
+  currentSize = sizeKey;
   const s = sizes[sizeKey];
 
   rows = s.rows;
@@ -52,22 +91,15 @@ function startNewGame(sizeKey) {
   gameOver = false;
   firstClick = true;
   cellsRevealed = 0;
-  statusElement.textContent = '';
 
-  // reset timer + HUD
   clearInterval(timerInterval);
   timer = 0;
-  if (timerElement) {
-    timerElement.textContent = "Time: 0";
-  }
-  if (mineCounterElement) {
-    mineCounterElement.textContent = `Mines: ${mines}`;
-  }
+  timerElement.textContent = "Time: 0";
+  mineCounterElement.textContent = `Mines: ${mines}`;
 
   createEmptyBoard();
   buildBoardDOM();
 
-  // hide menu
   menu.classList.remove("show");
   menu.style.display = "none";
 }
@@ -118,7 +150,6 @@ function buildBoardDOM() {
 function placeMines(firstRow, firstCol) {
   let placed = 0;
 
-  // Build 3×3 safe zone
   const safeZone = new Set();
   for (let dr = -1; dr <= 1; dr++) {
     for (let dc = -1; dc <= 1; dc++) {
@@ -174,7 +205,7 @@ function revealCell(cell) {
 
   const el = cell.element;
   el.classList.add('revealed');
-  el.style.animationDelay = `${Math.random() * 0.05}s`; // small stagger
+  el.style.animationDelay = `${Math.random() * 0.05}s`;
 
   if (cell.mine) {
     el.classList.add('mine');
@@ -215,8 +246,6 @@ function floodReveal(r, c) {
 
       const el = neighbor.element;
       el.classList.add('revealed');
-
-      // Wave effect on reveal
       el.style.animationDelay = `${(nr + nc) * 0.01}s`;
 
       if (neighbor.adjacent > 0) {
@@ -230,59 +259,69 @@ function floodReveal(r, c) {
 }
 
 // ===== WIN ANIMATION =====
-function playWinAnimation() {
+function playWinAnimation(callback) {
   let delay = 0;
+
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      const cellEl = board[r][c].element;
+      const cell = board[r][c];
+      if (cell.mine) continue; // skip mines
+
       setTimeout(() => {
-        cellEl.classList.add('win-animate');
+        cell.element.classList.add("win-ripple");
       }, delay);
-      delay += 10; // wave speed
+
+      delay += 8;
     }
   }
+
+  setTimeout(callback, delay + 300);
 }
 
+// ===== LOSE ANIMATION =====
 function playLoseAnimation(callback) {
   let delay = 0;
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const cell = board[r][c];
-      if (cell.mine) {
-        setTimeout(() => {
-          cell.element.classList.add("mine-explode");
-          cell.element.textContent = "💥";
-        }, delay);
-        delay += 80; // explosion wave speed
-      }
-    }
-  }
-
-  // After all explosions finish, call callback (show menu)
-  setTimeout(callback, delay + 300);
-}
-
-function playWinAnimation(callback) {
-  let delay = 0;
-
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const cellEl = board[r][c].element;
+      if (!cell.mine) continue;
 
       setTimeout(() => {
-        cellEl.classList.add("win-ripple");
+        cell.element.classList.add("mine-explode");
+        cell.element.textContent = "💥";
       }, delay);
 
-      delay += 10; // ripple speed
+      delay += 80;
     }
   }
 
-  setTimeout(callback, delay + 300);
+  setTimeout(callback, delay + 500);
 }
 
-
 // ===== GAME END =====
+function checkWin() {
+  const totalCells = rows * cols;
+  const nonMineCells = totalCells - mines;
+
+  if (cellsRevealed === nonMineCells && !gameOver) {
+    gameOver = true;
+    clearInterval(timerInterval);
+
+    playWinAnimation(() => {
+      const best = JSON.parse(localStorage.getItem("lb-" + currentSize) || "[]");
+      const isHighScore = best.length < 5 || timer < best[best.length - 1].time;
+
+      if (isHighScore) {
+        const name = prompt("New High Score! Enter your name:");
+        if (name) saveScore(currentSize, name, timer);
+      }
+
+      showMenu("🎉 You win!");
+    });
+  }
+}
+
 function revealAllMines() {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
@@ -293,21 +332,6 @@ function revealAllMines() {
       }
     }
   }
-}
-
-function checkWin() {
-  const totalCells = rows * cols;
-  const nonMineCells = totalCells - mines;
-
- if (cellsRevealed === nonMineCells && !gameOver) {
-  gameOver = true;
-  clearInterval(timerInterval);
-
-  playWinAnimation(() => {
-    showMenu("🎉 You win!");
-  });
-}
-
 }
 
 // ===== CLICK HANDLERS =====
@@ -323,12 +347,9 @@ function onCellLeftClick(e) {
     calculateAdjacents();
     firstClick = false;
 
-    // start timer on first click
     timerInterval = setInterval(() => {
       timer++;
-      if (timerElement) {
-        timerElement.textContent = `Time: ${timer}`;
-      }
+      timerElement.textContent = `Time: ${timer}`;
     }, 1000);
   }
 
@@ -337,18 +358,17 @@ function onCellLeftClick(e) {
   revealCell(cell);
 
   if (cell.mine) {
-  gameOver = true;
-  clearInterval(timerInterval);
+    gameOver = true;
+    clearInterval(timerInterval);
 
-  playLoseAnimation(() => {
-    showMenu("💥 You hit a mine! Try again.");
-  });
+    playLoseAnimation(() => {
+      showMenu("💥 You hit a mine! Try again.");
+    });
 
-  return;
-}
- else {
-    checkWin();
+    return;
   }
+
+  checkWin();
 }
 
 function onCellRightClick(e) {
@@ -370,9 +390,6 @@ function onCellRightClick(e) {
     cell.element.classList.remove("flagged");
   }
 
-  // update mine counter
-  if (mineCounterElement) {
-    const flaggedCount = board.flat().filter(c => c.flagged).length;
-    mineCounterElement.textContent = `Mines: ${mines - flaggedCount}`;
-  }
+  const flaggedCount = board.flat().filter(c => c.flagged).length;
+  mineCounterElement.textContent = `Mines: ${mines - flaggedCount}`;
 }
